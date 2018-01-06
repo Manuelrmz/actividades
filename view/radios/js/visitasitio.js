@@ -221,8 +221,8 @@ function limpiarCampos()
 	$("#motivo").val("");
 	$("#fechaVisita").val("");
 	$("#files").val("");
-	$("#sitios").data("kendoMultiSelect").value([])
-	$("#personal").data("kendoMultiSelect").value([])
+	$("#sitios").data("kendoMultiSelect").value([]);
+	$("#personal").data("kendoMultiSelect").value([]);
 	$("#comentarios").val("");
 	$("#btnImprimir").hide();
 }

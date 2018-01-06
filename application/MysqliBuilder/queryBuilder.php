@@ -481,7 +481,10 @@ class queryBuilder
     public function query($sql,$bindings)
     {
     	$bindings = new ValueObject($bindings);
-    	list($this->mysqliStatement) = $this->statement($sql,$bindings);
+    	$this->mysqliStatement = $this->statement($sql,$bindings);
+    	$this->mysqliResult = $this->mysqliStatement->get_result();
+    	$this->mysqliStatement->close();
+		$this->mysqliStatement = null;
     	return $this;
     }
     /**

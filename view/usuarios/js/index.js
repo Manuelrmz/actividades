@@ -1,9 +1,26 @@
 var user;
-var bandModificar;
+var bandModificar = false;
 function complete()
 {
 	$("#tablaUsuarios").kendoGrid(
 	{
+		dataSource: new kendo.data.DataSource(
+	    {
+	      schema: {
+	        model: {
+	          id: "usuario",
+	          fields: {
+	            usuario: {type: "number", editable: false, nullable: true },
+	            nombres: {validation: { required: true } },
+	            apellidos: { validation: { required: true } },
+	            cargo: { validation: { required: true } },
+	            ultimoAcceso: { validation: { required: true } },
+	            area: { validation: { required: true } },
+	          }
+	        }
+	      },
+	      pageSize:30
+	    }),
 		pageable:
 		{
 			refresh: true,
@@ -58,12 +75,15 @@ function complete()
 	$("#area").data("kendoComboBox").value("");
 	$("#cargo").kendoComboBox({placeholder:'Seleccione el cargo',dataTextField:'text',dataValueField:'value'});
 	$("#cargo").data("kendoComboBox").value("");
+	$("#permisos").kendoMultiSelect({placeholder:'Seleccione los modulos que accedera el usuario',dataTextField:'text',dataValueField:'value'});
+	//$("#permisos").data("kendoMultiSelect").value([]);
 	$("#formUsers").submit(guardarUsuario);
 	$("#btnLimpiar").click(limpiarCampos);
 	cargarTabla();
 	cargarAreas();
 	cargarCargos();
-	bandModificar = false;
+	cargarPermisos();
+	useBoxMessage = true;
 }
 function limpiarCampos()
 {
@@ -76,7 +96,7 @@ function limpiarCampos()
 	$("#pass2").val('');
 	$("#area").data("kendoComboBox").value('');
 	$("#cargo").data("kendoComboBox").value('');
-	$("#formUsers input[type=checkbox]").prop('checked',false);
+	$("#permisos").data("kendoMultiSelect").value([]);
 	$("#tablaUsuarios").data("kendoGrid").select({})
 	$("#usuario").prop('disabled',false);
 }
@@ -87,18 +107,13 @@ function cargarTabla()
 		try
 		{
 			var json = eval("("+data+")");
-			$("#tablaUsuarios").data("kendoGrid").setDataSource(new kendo.data.DataSource({data:[]}));
-			if(json.ok)
-			{
-				if(json.msg.length > 0)
-					$("#tablaUsuarios").data("kendoGrid").setDataSource(new kendo.data.DataSource({data: json.msg,pageSize:30}));
-			}
-			else
+			$("#tablaUsuarios").data("kendoGrid").dataSource.data(json.ok ? json.msg : []);
+			if(!json.ok)
 				updateError(json.msg,$("#aviso"));
 		}	
 		catch(ex)
 		{
-			updateError("Error cargando la tabla: "+ex,$("#aviso"));
+			updateError("Error cargando la tabla: "+ex);
 		}
 	});
 }
@@ -121,6 +136,7 @@ function guardarUsuario(e)
 	{
 		var dataSend = new FormData(this);
 		dataSend.append('usuario',(bandModificar ? user : $("#usuario").val()));
+		dataSend.set('permisos',$("#permisos").data("kendoMultiSelect").value());
 		var url = path + (bandModificar ? 'usuarios/update' : 'usuarios/new');
 		$.ajax(
 		{
@@ -150,11 +166,11 @@ function guardarUsuario(e)
 			},
 			done:function(data)
 			{
-				console.log('Done: '+data);
+				updateError('Done: '+data);
 			},
 			error: function(data)
 			{
-				console.log('Error: '+data);
+				updateError('Error: '+data);
 			}
 		});
 	}
@@ -165,41 +181,30 @@ function eventoTabla()
 	{
 		var fila = $('td',this);
 		user = $(fila[0]).text();
-		buscarUsuario();
-	});
-}
-function buscarUsuario()
-{
-	$.post(path+'usuarios/getuser',{usuario:user},function(data)
-	{
-		try
+		$.post(path+'usuarios/getuserwithpermission',{usuario:user},function(data)
 		{
-			var json = eval("("+data+")");
-			if(json.ok)
+			try
 			{
-				console.log(json.msg);
-				bandModificar = true;
-				$("#usuario").val(json.msg.usuario);
-				$("#usuario").prop('disabled','disabled');
-				$("#nombres").val(json.msg.nombres);
-				$("#apellidos").val(json.msg.apellidos);
-				$("#area").data("kendoComboBox").text(json.msg.area);
-				$("#cargo").data("kendoComboBox").value(json.msg.cargo);
-				$("#capof").prop('checked',(json.msg.capturaOf == 1 ? true : false));
-				$("#busof").prop('checked',(json.msg.busquedaOf == 1 ? true : false));
-				$("#segaof").prop('checked',(json.msg.seguimientoOf == 1 ? true : false));
-				$("#seggof").prop('checked',(json.msg.seguimientoGenOf == 1 ? true : false));
-				$("#admuser").prop('checked',(json.msg.adminusers == 1 ? true : false));
-				$("#historico").prop('checked',(json.msg.historico == 1 ? true : false));
-				$("#acceso").prop('checked',(json.msg.acceso == 1 ? true : false));
+				var json = eval("("+data+")");
+				if(json.ok)
+				{
+					bandModificar = true;
+					$("#usuario").val(json.msg.usuario);
+					$("#usuario").prop('disabled','disabled');
+					$("#nombres").val(json.msg.nombres);
+					$("#apellidos").val(json.msg.apellidos);
+					$("#area").data("kendoComboBox").text(json.msg.area);
+					$("#cargo").data("kendoComboBox").value(json.msg.cargo);
+					$("#permisos").data("kendoMultiSelect").value(json.msg.permisos);
+				}
+				else
+					updateError(json.msg,$("#aviso"));
 			}
-			else
-				updateError(json.msg,$("#aviso"));
-		}
-		catch(err)
-		{
-			updateError("Error buscando al usuario: "+err,$("#aviso"));
-		}
+			catch(err)
+			{
+				updateError("Error buscando al usuario: "+err+ " Data: "+data,$("#aviso"));
+			}
+		});
 	});
 }
 function cargarAreas()
@@ -209,16 +214,13 @@ function cargarAreas()
 		try
 		{
 			var json = eval("("+data+")");
-			if(json.ok)
-			{
-				$("#area").data("kendoComboBox").setDataSource(json.msg);
-			}
-			else
-				console.log(json.msg);
+			$("#area").data("kendoComboBox").setDataSource(json.ok ? json.msg : []);
+			if(!json.ok)
+				updateError(json.msg);
 		}
 		catch(err)
 		{
-			console.log(err);
+			updateError("Error: "+ err + " Data: "+data);
 		}	
 	});
 }
@@ -229,17 +231,31 @@ function cargarCargos()
 		try
 		{
 			var json = eval("("+data+")");
-			if(json.ok)
-			{
-				$("#cargo").data("kendoComboBox").setDataSource(json.msg);
-			}
-			else
-				console.log(json.msg);
+			$("#cargo").data("kendoComboBox").setDataSource(json.ok ? json.msg : []);
+			if(!json.ok)
+				updateError(json.msg);
 		}
 		catch(err)
 		{
-			console.log(err);
+			updateError("Error: "+ err + " Data: "+data);
 		}	
+	});
+}
+function cargarPermisos()
+{
+	$.post(path+'permisos/getpermissionnames',function(data)
+	{
+		try
+		{
+			var json = eval("("+data+")");
+			$("#permisos").data("kendoMultiSelect").setDataSource(json.ok ? json.msg : []);
+			if(!json.ok)
+				updateError(json.msg);
+		}
+		catch(err)
+		{
+			updateError("Error: "+ err + " Data: "+data);
+		}
 	});
 }
 $(document).ready(complete);

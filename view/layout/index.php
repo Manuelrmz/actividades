@@ -23,7 +23,7 @@
 				<div class="container">
 					<div id="mainHeader">
 						<a href="/<?php echo BASE_DIR;?>">
-							<img src="/<?php echo BASE_DIR;?>/images/c4.gif" alt="" height="35px">Centro de Comando, Control, Comunicaciones y Computo
+							<!-- <img src="/<?php echo BASE_DIR;?>/images/c4.gif" alt="" height="35px">Centro de Comando, Control, Comunicaciones y Computo -->
 						</a>
 						<?php
 						if(isset($_SESSION["userData"]))

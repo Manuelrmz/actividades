@@ -2,6 +2,8 @@
 class usuariosController extends Controller
 {
     private $_usuario = array();
+    private $_data = array();
+    private $_return = array('ok'=>false,'msg'=>'');
 	public function __construct()
     {
         parent::__construct();
@@ -11,152 +13,153 @@ class usuariosController extends Controller
         Session::regenerateId();
         Session::securitySession();
         $this->validatePermissions('usuariosadmon');
-        $this->_view->renderizar('index','UCTA - Administrar Usuarios');
+        $this->_view->renderizar('index','Actividades C4 - Administrar Usuarios');
     }
-    public function nuevo()
+    public function new()
     {
         Session::regenerateId();
         Session::securitySession();
         $this->validatePermissions('usuariosadmon');
         $db = new queryBuilder();
-        $return = array('ok'=>false,'msg'=>'');
+        $this->usuario($_POST);
         $condi = true;
-        $this->usuario();
-        $this->_usuario["capturaOf"] = isset($_POST["capof"]) ? 1 : 2;
-        $this->_usuario["busquedaOf"] = isset($_POST["busof"]) ? 1 : 2;
-        $this->_usuario["seguimientoOf"] = isset($_POST["segaof"]) ? 1 : 2;
-        $this->_usuario["seguimientoGenOf"] = isset($_POST["seggof"]) ? 1 : 2;
-        $this->_usuario["adminusers"] = isset($_POST["admuser"]) ? 1 : 2;
-        $this->_usuario["historico"] = isset($_POST["historico"]) ? 1 : 2;
-        $this->_usuario["acceso"] = isset($_POST["acceso"]) ? 1 : 2;
-        $condi = $condi && $this->_validar->MinMax($this->_usuario["usuario"],1,50,'Usuario');
-        $condi = $condi && $this->_validar->MinMax($this->_usuario["nombres"],1,50,'Nombres');
-        $condi = $condi && $this->_validar->MinMax($this->_usuario["apellidos"],1,50,'Apellidos');
-        $condi = $condi && $this->_validar->NoEmpty($this->_usuario["pass1"],"Contrase&ntilde;a");
-        $condi = $condi && $this->_validar->NoEmpty($this->_usuario["pass2"],"Confirmar Contrase&ntilde;a");
-        $condi = $condi && $this->_validar->NoEmpty($this->_usuario["area"],"Area");
-        $condi = $condi && $this->_validar->Int($this->_usuario["cargo"],'Cargo');
+        $condi = $condi && $this->_validar->MinMax($this->_data["usuario"],1,50,'Usuario');
+        $condi = $condi && $this->_validar->MinMax($this->_data["nombres"],1,50,'Nombres');
+        $condi = $condi && $this->_validar->MinMax($this->_data["apellidos"],1,50,'Apellidos');
+        $condi = $condi && $this->_validar->NoEmpty($this->_data["pass1"],"Contrase&ntilde;a");
+        $condi = $condi && $this->_validar->NoEmpty($this->_data["pass2"],"Confirmar Contrase&ntilde;a");
+        $condi = $condi && $this->_validar->NoEmpty($this->_data["area"],"Area");
+        $condi = $condi && $this->_validar->Int($this->_data["cargo"],'Cargo');
         if($condi)
         {
-            if($this->_usuario["pass1"] == $this->_usuario["pass2"])
+            if($this->_data["pass1"] === $this->_data["pass2"])
             {
+                $permission = $this->mapPermissionUsers();
+                $permission = array_merge($permission["allowed"],$permission["denied"]);
+                $newPermission = explode(",",$this->_data["permisos"]);
+                for($i = 0; $i < sizeof($newPermission); $i++)
+                {
+                    if($newPermission[$i] !== "")
+                        $permission[$newPermission[$i]] = 1;
+                }
+                $this->_data["permisos"] = $permission;
                 $transaction = $db->transaction(function($q)
                 {
-                    $q->table('usuarios')->insert(array('usuario'=>$this->_usuario["usuario"],'contrasenia'=>MD5(SHA1($this->_usuario["pass1"])),
-                                                'nombres'=>$this->_usuario["nombres"],'apellidos'=>$this->_usuario["apellidos"],
-                                                'cargo'=>$this->_usuario["cargo"],'area'=>$this->_usuario["area"]));
-                    $q->table('permisos')->insert(array('usuario'=>$this->_usuario["usuario"],'capturaOf'=>$this->_usuario["capturaOf"],
-                                                        'busquedaOf'=>$this->_usuario["busquedaOf"],'seguimientoOf'=>$this->_usuario["seguimientoOf"],
-                                                        'seguimientoGenOf'=>$this->_usuario["seguimientoGenOf"],'adminusers'=>$this->_usuario["adminusers"],'historico'=>$this->_usuario["historico"],'acceso'=>$this->_usuario["acceso"]));
+                    $q->table('usuarios')->insert(array('usuario'=>$this->_data["usuario"],'contrasenia'=>MD5(SHA1($this->_data["pass1"])),'nombres'=>$this->_data["nombres"],'apellidos'=>$this->_data["apellidos"],
+                        'cargo'=>$this->_data["cargo"],'area'=>$this->_data["area"]));
+                    $q->table('permisos')->insert(array_merge($$this->_data["permisos"],array('usuario',$this->_data["usuario"])));
                 });
                 if($transaction)
                 {
-                    $return["msg"] = 'Usuario Guardado Correctamente';
-                    $return["ok"] = true;
+                    $this->_return["msg"] = 'Usuario Guardado Correctamente';
+                    $this->_return["ok"] = true;
                 }
                 else
-                    $return["msg"] = 'Error ingresando el usuario: '.$db->getError()["string"];
+                    $this->_return["msg"] = 'Error ingresando el usuario: '.$db->getError()["string"];
             }
             else
-                $return["msg"] = "Las contrase&ntilde;as no coinciden";
+                $this->_return["msg"] = "Las contrase&ntilde;as no coinciden";
         }
         else
-            $return["msg"] = $this->_validar->getWarnings();
-        echo json_encode($return);
+            $this->_return["msg"] = $this->_validar->getWarnings();
+        echo json_encode($this->_return);
     }
-    public function modificarUsuarioPermisos()
+    public function getForTable()
+    {
+        Session::regenerateId();
+        Session::securitySession();
+        $this->validatePermissions('usuariosadmon');
+        $usuarios = usuarios::select(array('usuarios.usuario','usuarios.nombres','usuarios.apellidos','c.cargo','usuarios.ultimoAcceso','usuarios.area'))
+                    ->join(array('cargosUsuario','c'),'usuarios.cargo','=','c.id','LEFT')
+                    ->orderBy('usuarios.ultimoAcceso','DESC')->get()->fetch_all();
+        if($usuarios)
+        {
+            $this->_return["msg"] = $usuarios;
+            $this->_return["ok"] = true;
+        }
+        else
+            $this->_return["msg"] = "No se encontraron usuarios";
+        echo json_encode($this->_return);
+    }
+    public function getByUserWithPermission()
+    {
+        Session::regenerateId();
+        Session::securitySession();
+        $this->validatePermissions('usuariosadmon');
+        $this->usuario($_POST);
+        $condi = true;
+        $condi = $condi && $this->_validar->NoEmpty($this->_data["usuario"],'Usuario');
+        if($condi)
+        {
+            $usuario = usuarios::select(array('usuario','nombres','apellidos','cargo','area'))
+                        ->where('usuario',$this->_data["usuario"])->get()->fetch_assoc();
+            $permisos = permisos::where('usuario',$this->_data["usuario"])->get()->fetch_assoc();
+            if($usuario)
+            {
+                $usuario["permisos"] = array_keys($this->mapPermissionUsers($permisos)["allowed"]);
+                $this->_return["msg"] = $usuario;
+                $this->_return["ok"] = true;
+            }
+            else
+                $this->_return["msg"] = "No se encontro el usuario";
+        }
+        else
+            $this->_return["msg"] = $this->_validar->getWarnings();
+        echo json_encode($this->_return);
+    }
+    public function update()
     {
         Session::regenerateId();
         Session::securitySession();
         $this->validatePermissions('usuariosadmon');
         $db = new queryBuilder();
-        $return = array('ok'=>false,'msg'=>'');
+        $this->usuario($_POST);
         $condi = true;
-        $this->usuario();
-        $this->_usuario["capturaOf"] = isset($_POST["capof"]) ? 1 : 2;
-        $this->_usuario["busquedaOf"] = isset($_POST["busof"]) ? 1 : 2;
-        $this->_usuario["seguimientoOf"] = isset($_POST["segaof"]) ? 1 : 2;
-        $this->_usuario["seguimientoGenOf"] = isset($_POST["seggof"]) ? 1 : 2;
-        $this->_usuario["adminusers"] = isset($_POST["admuser"]) ? 1 : 2;
-        $this->_usuario["historico"] = isset($_POST["historico"]) ? 1 : 2;
-        $this->_usuario["acceso"] = isset($_POST["acceso"]) ? 1 : 2;
-        $condi = $condi && $this->_validar->MinMax($this->_usuario["usuario"],1,50,'Usuario');
-        $condi = $condi && $this->_validar->MinMax($this->_usuario["nombres"],1,50,'Nombres');
-        $condi = $condi && $this->_validar->MinMax($this->_usuario["apellidos"],1,50,'Apellidos');
-        if($this->_usuario["pass1"] != "" || $this->_usuario["pass2"] != "")
+        $condi = $condi && $this->_validar->MinMax($this->_data["usuario"],1,50,'Usuario');
+        $condi = $condi && $this->_validar->MinMax($this->_data["nombres"],1,50,'Nombres');
+        $condi = $condi && $this->_validar->MinMax($this->_data["apellidos"],1,50,'Apellidos');
+        if($this->_data["pass1"] !== "" || $this->_data["pass2"] !== "")
         {
-            $condi = $condi && $this->_validar->NoEmpty($this->_usuario["pass1"],"Contrase&ntilde;a");
-            $condi = $condi && $this->_validar->NoEmpty($this->_usuario["pass2"],"Confirmar Contrase&ntilde;a");
-            if($this->_usuario["pass1"] != $this->_usuario["pass2"])
+            $condi = $condi && $this->_validar->NoEmpty($this->_data["pass1"],"Contrase&ntilde;a");
+            $condi = $condi && $this->_validar->NoEmpty($this->_data["pass2"],"Confirmar Contrase&ntilde;a");
+            if($this->_data["pass1"] !== $this->_data["pass2"])
             {
                 $condi = false;
                 $this->_validar->setWarnings('Las Contraseñas No coinciden');
             }
         }
-        $condi = $condi && $this->_validar->NoEmpty($this->_usuario["area"],"Area");
-        $condi = $condi && $this->_validar->Int($this->_usuario["cargo"],'Cargo');
+        $condi = $condi && $this->_validar->NoEmpty($this->_data["area"],"Area");
+        $condi = $condi && $this->_validar->Int($this->_data["cargo"],'Cargo');
         if($condi)
         {
+            $permission = $this->mapPermissionUsers();
+            $permission = array_merge($permission["allowed"],$permission["denied"]);
+            $newPermission = explode(",",$this->_data["permisos"]);
+            for($i = 0; $i < sizeof($newPermission); $i++)
+            {
+                if($newPermission[$i] !== "")
+                    $permission[$newPermission[$i]] = 1;
+            }
+            $this->_data["permisos"] = $permission;
             $transaction = $db->transaction(function($q)
             {
-                $userarray = array('nombres'=>$this->_usuario["nombres"],'apellidos'=>$this->_usuario["apellidos"],'cargo'=>$this->_usuario["cargo"],'area'=>$this->_usuario["area"]);
-                if($this->_usuario["pass1"] != "" && $this->_usuario["pass2"] != "")
-                    $userarray['contrasenia'] = MD5(SHA1($this->_usuario["pass1"]));
-                $q->table('usuarios')->where('usuario',$this->_usuario["usuario"])->update($userarray);
-                $q->table('permisos')->where('usuario',$this->_usuario["usuario"])->update(array('capturaOf'=>$this->_usuario["capturaOf"],'busquedaOf'=>$this->_usuario["busquedaOf"],'seguimientoOf'=>$this->_usuario["seguimientoOf"],
-                                                    'seguimientoGenOf'=>$this->_usuario["seguimientoGenOf"],'adminusers'=>$this->_usuario["adminusers"],'historico'=>$this->_usuario["historico"],'acceso'=>$this->_usuario["acceso"]));
+                $userarray = array('nombres'=>$this->_data["nombres"],'apellidos'=>$this->_data["apellidos"],'cargo'=>$this->_data["cargo"],'area'=>$this->_data["area"]);
+                if($this->_data["pass1"] !== "" && $this->_data["pass2"] !== "")
+                    $userarray['contrasenia'] = MD5(SHA1($this->_data["pass1"]));
+                $q->table('usuarios')->where('usuario',$this->_data["usuario"])->update($userarray);
+                $q->table('permisos')->where('usuario',$this->_data["usuario"])->update($this->_data["permisos"]);
             });
             if($transaction)
             {
-                $return["msg"] = 'Usuario Actualizado Correctamente';
-                $return["ok"] = true;
+                $this->_return["msg"] = 'Usuario Actualizado Correctamente';
+                $this->_return["ok"] = true;
             }
             else
-                $return["msg"] = 'Error Actualizando el usuario: '.$db->getError()["string"];
+                $this->_return["msg"] = 'Error Actualizando el usuario: '.$db->getError()["string"];
         }
         else
-            $return["msg"] = $this->_validar->getWarnings();
-        echo json_encode($return);
-    }
-    public function obtenerTabla()
-    {
-        Session::regenerateId();
-        Session::securitySession();
-        $this->validatePermissions('usuariosadmon');
-        $return = array('ok'=>false,'msg'=>'');
-        $usuarios = usuarios::select(array('usuarios.usuario','usuarios.nombres','usuarios.apellidos','c.cargo','usuarios.ultimoAcceso','usuarios.area'))->join(array('cargosUsuario','c'),'usuarios.cargo','=','c.id','LEFT')->orderBy('usuarios.ultimoAcceso','DESC')->get()->fetch_all();
-        if($usuarios)
-        {
-            $return["msg"] = $usuarios;
-            $return["ok"] = true;
-        }
-        else
-            $return["msg"] = "No se encontraron usuarios";
-        echo json_encode($return);
-    }
-    public function obtenerUsuario()
-    {
-        Session::regenerateId();
-        Session::securitySession();
-        $this->validatePermissions('usuariosadmon');
-        $return = array('ok'=>false,'msg'=>'');
-        $this->usuario();
-        $condi = true;
-        $condi = $condi && $this->_validar->NoEmpty($this->_usuario["usuario"],'Usuario');
-        if($condi)
-        {
-            $usuario = usuarios::select(array('usuarios.nombres','usuarios.apellidos','usuarios.cargo','usuarios.area','p.*'))->join(array('permisos','p'),'usuarios.usuario','=','p.usuario','LEFT')->where('usuarios.usuario',$this->_usuario["usuario"])->get()->fetch_assoc();
-            if($usuario)
-            {
-                $return["msg"] = $usuario;
-                $return["ok"] = true;
-            }
-            else
-                $return["msg"] = "No se encontro el usuario";
-        }
-        else
-            $return["msg"] = $this->_validar->getWarnings();
-        echo json_encode($return);
+            $this->_return["msg"] = $this->_validar->getWarnings();
+        echo json_encode($this->_return);
     }
     public function cambiarcontrasenia()
     {
@@ -283,22 +286,41 @@ class usuariosController extends Controller
                     ->get()->fetch_all();
         if($usuarios)
         {
-            $return["msg"] = $usuarios;
-            $return["ok"] = true;
+            $this->_return["msg"] = $usuarios;
+            $this->_return["ok"] = true;
         }
         else
-            $return["msg"] = "Error obteniendo la lista de usuarios";
-        echo json_encode($return);
+            $this->_return["msg"] = "Error obteniendo la lista de usuarios";
+        echo json_encode($this->_return);
     }
-    public function usuario()
+    public function mapPermissionUsers(array $currentAllowedPermission = array())
     {
-        $this->_usuario["usuario"] = isset($_POST["usuario"]) ? $_POST["usuario"] : "";
-        $this->_usuario["nombres"] = isset($_POST["nombres"]) ? $_POST["nombres"] : "";
-        $this->_usuario["apellidos"] = isset($_POST["apellidos"]) ? $_POST["apellidos"] : "";
-        $this->_usuario["pass1"] = isset($_POST["pass1"]) ? $_POST["pass1"] : "";
-        $this->_usuario["pass2"] = isset($_POST["pass2"]) ? $_POST["pass2"] : "";
-        $this->_usuario["cargo"] = isset($_POST["cargo"]) ? (integer)$_POST["cargo"] : 0;
-        $this->_usuario["area"] = isset($_POST["area_input"]) ? $_POST["area_input"] : "";
+        $permissionObj = new permisosController();
+        $permissionNames = $permissionObj->getPermissionColumnNames();
+        $allowedPermission = array('allowed'=>array(),'denied'=>array());
+        if(sizeof($permissionNames) > 0)
+        {
+            
+            foreach($permissionNames as $value)
+            {
+                if(isset($currentAllowedPermission[$value["value"]]) && $currentAllowedPermission[$value["value"]] == 1)
+                    $allowedPermission["allowed"][$value["value"]] = 1;
+                else
+                    $allowedPermission["denied"][$value["value"]] = 2;
+            } 
+        } 
+        return $allowedPermission;
+    }
+    public function usuario($data)
+    {
+        $this->_data["usuario"] = isset($data["usuario"]) ? $data["usuario"] : "";
+        $this->_data["nombres"] = isset($data["nombres"]) ? $data["nombres"] : "";
+        $this->_data["apellidos"] = isset($data["apellidos"]) ? $data["apellidos"] : "";
+        $this->_data["pass1"] = isset($data["pass1"]) ? $data["pass1"] : "";
+        $this->_data["pass2"] = isset($data["pass2"]) ? $data["pass2"] : "";
+        $this->_data["cargo"] = isset($data["cargo"]) ? (integer)$data["cargo"] : 0;
+        $this->_data["area"] = isset($data["area_input"]) ? $data["area_input"] : "";
+        $this->_data["permisos"] = isset($data["permisos"]) ? $data["permisos"] : "";
     }
 }
 ?>

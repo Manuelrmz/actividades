@@ -16,10 +16,10 @@ $this->get('radios/reporteador');
 $this->post('radios/getpersonallist','getPersonalForList');
 //Modulos Usuarios
 $this->get('usuarios');
-$this->post('usuarios/gettabla','obtenerTabla');
-$this->post('usuarios/getuser','obtenerUsuario');
-$this->post('usuarios/update','modificarUsuarioPermisos');
-$this->post('usuarios/new','nuevo');
+$this->post('usuarios/gettabla','getForTable');
+$this->post('usuarios/getuserwithpermission','getByUserWithPermission');
+$this->post('usuarios/update');
+$this->post('usuarios/new');
 $this->post('usuarios/login');
 $this->get('usuarios/logout');
 $this->get('usuarios/cambiarcontrasenia');
@@ -133,6 +133,8 @@ $this->post('proveedores/update');
 $this->post('catinventario/getforcombo','getForComboBox');
 /*modulos municipios*/
 $this->post('municipios/getselect','getForComboBox');
+/*Modulos Permisos*/
+$this->post('permisos/getpermissionnames','getPermissionNames');
 /*Modulos Manejo de Errores*/
 $this->get('error');
 $this->get('error/error403');

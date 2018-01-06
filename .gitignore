@@ -4,4 +4,4 @@
 /core/PHPExcel
 /private/*
 .DS_store
-.sql
+*.sql

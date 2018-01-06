@@ -1,6 +1,7 @@
 <?php
 	echo $this->addScript('view/usuarios/css/index.css','css');
 	echo $this->addScript('core/kendo/js/kendo.web.min.js','js');
+	echo $this->addScript('core/css/alertbox.css','css');
 	echo $this->addScript('core/js/validaciones.js','js');
 	echo $this->addScript('view/usuarios/js/index.js','js');
 ?>
@@ -30,21 +31,16 @@
 		</div>
 		<div class="col-sm-3">
 			<div class="col-sm-12 margin-form bold">Area</div>
-			<div class="col-sm-12 margin-form"><select name="area" id="area" style="width:95%;"></select></div>
+			<div class="col-sm-12 margin-form"><select name="area" id="area" style="width:100%;"></select></div>
 		</div>
 		<div class="col-sm-3">
 			<div class="col-sm-12 margin-form bold">Cargo</div>
-			<div class="col-sm-12 margin-form"><select name="cargo" id="cargo" style="width:95%;"></select></div>
+			<div class="col-sm-12 margin-form"><select name="cargo" id="cargo" style="width:100%;"></select></div>
 		</div>
-		<div class="col-sm-12 margin-form"><h3>Permisos</h3></div>
-		<div class="col-2 margin-form"><label for="capof" class="bold">Captura de Oficios</label>&nbsp;<input type="checkbox" name="capof" id="capof"></div>
-		<div class="col-2 margin-form"><label for="busof" class="bold">Busqueda de Oficios</label>&nbsp;<input type="checkbox" name="busof" id="busof"></div>
-		<div class="col-2 margin-form"><label for="segaof" class="bold">Seguimiento Por Area</label>&nbsp;<input type="checkbox" name="segaof" id="segaof"></div>
-		<div class="col-2 margin-form"><label for="seggof" class="bold">Seguimiento General</label>&nbsp;<input type="checkbox" name="seggof" id="seggof"></div>
-		<div class="col-2 margin-form"><label for="admuser" class="bold">Administrar Usuarios</label>&nbsp;<input type="checkbox" name="admuser" id="admuser"></div>
-		<div class="col-2 margin-form"><label for="historico" class="bold">Historico</label>&nbsp;<input type="checkbox" name="historico" id="historico"></div>
-		<div class="col-2 margin-form"><label for="acceso" class="bold">Acceso</label>&nbsp;<input type="checkbox" name="acceso" id="acceso"></div>
-		<div class="col-12 margin-form text-center bold text-warning" id="aviso"></div>
+		<div class="col-sm-12">
+			<div class="col-sm-12 margin-form bold">Modulos</div>
+			<div class="col-sm-12 margin-form"><select name="permisos" id="permisos" multiple style="width:100%;"></select></div>
+		</div>
 		<div class="col-12 margin-form text-center"><button class="k-button" id="btnGuardar">Guardar Usuario</button><div style="margin-left:25px;" class="k-button" id="btnLimpiar">Limpiar Campos</div></div>
 	</form>
 </div>
