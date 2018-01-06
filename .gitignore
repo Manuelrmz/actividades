@@ -3,3 +3,4 @@
 /core/mpdf
 /core/PHPExcel
 /private/*
+.DS_store
