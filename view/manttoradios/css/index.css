@@ -1,0 +1,4 @@
+#reporta,#motivo,#comenTerminal,#rfsi,#serie,#nslog,#terminal,#comenIntervencion,#observaciones{width: 100%;}
+#motivo{height: 150px;}
+#comenTerminal,#comenIntervencion,#observaciones{height: 43px;}
+#rfsi,#serie,#nslog,#terminal

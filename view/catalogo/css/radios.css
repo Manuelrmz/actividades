@@ -1,0 +1,14 @@
+#pestanias,#optionsPestanias{margin-top: 10px;}
+#pestanias span{padding-right: 5px;}
+#pestanias div
+{
+	cursor:pointer; 
+	padding: 10px 0;
+	border: #f1f1f1 solid;
+	border-width: 1px 1px 0 1px;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+}
+#pestanias div:hover{background-color: #f1f1f1;}
+#nombreAsignacion{width: 90%;}
+.selected{background-color: #e0e0e0; border:solid #c0c0c0; border-width: 1px 1px 0 1px;}

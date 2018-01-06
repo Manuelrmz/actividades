@@ -1,0 +1,21 @@
+#reporta,#vehiculo,#placas,#odometro,#motivo{width:100%;}
+#comentarios{
+	width: 100%; height: 40px;
+}
+#input_file{
+	font-size: 2.1em;
+  	cursor: pointer;
+  	text-align: center;
+}
+#input_file::before{cursor: pointer; z-index:99;}
+#input_file input[type="file"]
+{
+  display: block;
+  position: absolute;
+  top: 0;
+  right:0;
+  width:100%;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  cursor:pointer;
+}
