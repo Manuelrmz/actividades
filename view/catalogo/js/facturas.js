@@ -407,43 +407,44 @@ function complete()
             },
             update: function(e)
             {
-              // $.post(path+"catinventario/update",e.data.models[0],function(data)
-              // {
-              //   try
-              //   {
-              //     var json = eval("("+data+")");
-              //     if(json.ok)
-              //       e.success();
-              //     else
-              //       updateError(json.msg);
-              //   }
-              //   catch(err)
-              //   {
-              //     updateError("Error modificando la categoria: "+err+ " data:"+data);
-              //   }
-              // });
+              e.data.models[0].idejercicio = idEjercicio;
+              $.post(path+"programa/update",e.data.models[0],function(data)
+              {
+                try
+                {
+                  var json = eval("("+data+")");
+                  if(json.ok)
+                    e.success();
+                  else
+                    updateError(json.msg);
+                }
+                catch(err)
+                {
+                  updateError("Error modificando el programa: "+err+ " data:"+data);
+                }
+              });
             },
             create: function(e)
             {
-              console.log(idEjercicio);
-              // $.post(path+"ejercicio/new",e.data.models[0],function(data)
-              // {
-              //   try
-              //   {
-              //     var json = eval("("+data+")");
-              //     if(json.ok)
-              //     {
-              //       e.data.models[0].id = json.id;
-              //       e.success(e.data.models[0]);
-              //     }
-              //     else
-              //       updateError(json.msg);
-              //   }
-              //   catch(err)
-              //   {
-              //     updateError("Error creando el nuevo ejercicio: "+err+ " data:"+data);
-              //   }
-              // });
+              e.data.models[0].idejercicio = idEjercicio;
+              $.post(path+"programa/new",e.data.models[0],function(data)
+              {
+                try
+                {
+                  var json = eval("("+data+")");
+                  if(json.ok)
+                  {
+                    e.data.models[0].id = json.id;
+                    e.success(e.data.models[0]);
+                  }
+                  else
+                    updateError(json.msg);
+                }
+                catch(err)
+                {
+                  updateError("Error creando el nuevo programa: "+err+ " data:"+data);
+                }
+              });
             },
             parameterMap: function(options, operation)
             {
@@ -460,6 +461,7 @@ function complete()
                 fields:
                 {
                   id: { editable: false, nullable: true },
+                  idejercicio: {validation:false},
                   nombre: { validation: { required: true } },
                   descripcion: { validation: { required: false } }
                 }

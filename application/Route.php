@@ -108,6 +108,8 @@ $this->post('ejercicio/getfortable','getEjerciciosForTable');
 $this->post('ejercicio/new');
 $this->post('ejercicio/update');
 /*Programas*/
+$this->post('programa/new');
+$this->post('programa/update');
 $this->post('programa/getbyejercicio','getProgramasByEjercicio');
 $this->post('programa/getforcombobyejercicio','getProgramasForComboByEjercicio');
 /*Catalogo Categorias Inventario*/
