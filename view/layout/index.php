@@ -23,7 +23,7 @@
 				<div class="container">
 					<div id="mainHeader">
 						<a href="/<?php echo BASE_DIR;?>">
-							<!-- <img src="/<?php echo BASE_DIR;?>/images/c4.gif" alt="" height="35px">Centro de Comando, Control, Comunicaciones y Computo -->
+							<img src="/<?php echo BASE_DIR;?>/images/c4.gif" alt="" height="35px">Centro de Comando, Control, Comunicaciones y Computo
 						</a>
 						<?php
 						if(isset($_SESSION["userData"]))
@@ -54,7 +54,7 @@
 								<div class="menu"><a href="/<?php echo BASE_DIR;?>/servicios"><span class="glyphicon glyphicon-file"></span>Servicios</a></div>
 								<?php
 								}
-						if($_SESSION["userData"]["factura"] == 1 || $_SESSION["userData"]["proveedor"] == 1 || $_SESSION["userData"]["ejercicio"] == 1 || $_SESSION["userData"]["inventario"] == 1 || $_SESSION["userData"]["catcategoriainventario"] == 1)
+						if($_SESSION["userData"]["factura"] == 1 || $_SESSION["userData"]["proveedor"] == 1 || $_SESSION["userData"]["inventario"] == 1 || $_SESSION["userData"]["catalogoFacturas"] == 1)
 						{
 						?>
 							<div class="menu"><a href="#"><span class="glyphicon glyphicon-menu-down"></span>Gestion de Activos</a>
@@ -66,19 +66,19 @@
 										<div class="submenuoption"><a href="/<?php echo BASE_DIR;?>/facturas"><span class="glyphicon glyphicon-inbox"></span>Facturas</a></div>
 									<?php
 									}
-									if($_SESSION["userData"]["ejercicio"] == 1)
+									if($_SESSION["userData"]["proveedor"] == 1)
 									{
 									?>
-										<!-- <div class="submenuoption"><a href="/<?php echo BASE_DIR;?>/ejercicio"><span class="glyphicon glyphicon-list"></span>Ejercicios</a></div> -->
+										<div class="submenuoption"><a href="/<?php echo BASE_DIR;?>/proveedores"><span class="glyphicon glyphicon-list"></span>Proveedores</a></div>
 									<?php
 									}
-									if($_SESSION["userData"]["catcategoriainventario"] == 1)
+									if($_SESSION["userData"]["inventario"] == 1)
 									{
 									?>
-									 	<!-- <div class="submenuoption"><a href="/<?php echo BASE_DIR;?>/catinventario"><span class="glyphicon glyphicon-list"></span>Cat. Categoria inventario</a></div> -->
+										<div class="submenuoption"><a href="/<?php echo BASE_DIR;?>/inventario"><span class="glyphicon glyphicon-list"></span>Inventario</a></div>
 									<?php
 									}
-									if($_SESSION["userData"]["proveedor"] == 1 || $_SESSION["userData"]["ejercicio"] == 1 || $_SESSION["userData"]["catcategoriainventario"] == 1)
+									if($_SESSION["userData"]["catalogoFacturas"] == 1)
 									{
 									?>
 										<div class="submenuoption"><a href="/<?php echo BASE_DIR;?>/catalogo/facturas"><span class="glyphicon glyphicon-list"></span>Catalogos</a></div>
