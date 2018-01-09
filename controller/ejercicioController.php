@@ -17,7 +17,6 @@ class ejercicioController extends Controller{
   {
     Session::regenerateId();
     Session::securitySession();
-    $this->validatePermissions('ejercicio');
     $this->ejercicio($_POST);
     $db = new queryBuilder();
     $condi = true;
@@ -56,7 +55,6 @@ class ejercicioController extends Controller{
   {
     Session::regenerateId();
     Session::securitySession();
-    $this->validatePermissions('ejercicio');
     $this->ejercicio($_POST);
     $db = new queryBuilder();
     $condi = true;

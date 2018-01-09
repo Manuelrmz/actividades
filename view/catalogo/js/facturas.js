@@ -12,9 +12,8 @@ function complete()
             try
             {
               var json = eval("("+data+")");
-              if(json.ok)
-                e.success(json.msg);
-              else
+              e.success(json.ok ? json.msg : []);
+              if(!json.ok)
                 updateError(json.msg);
             }
             catch(err)

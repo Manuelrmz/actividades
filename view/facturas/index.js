@@ -145,8 +145,10 @@ function saveFactura(e)
 					{
             cleanFieldsFactura();
             $("#formBusqueda").trigger("submit");
+            showSuccessBox(json.msg);
 					}
-          updateError(json.msg)
+          else
+            updateError(json.msg);
 				}
 				catch(err)
 				{
@@ -208,7 +210,6 @@ function tableEvent()
         var json = eval("("+data+")");
         if(json.ok)
         {
-          console.log(json.msg);
           cleanFieldsFactura();
           $("#titleForm").html("Modificando Factura: "+json.msg.id);
           currentId = json.msg.id;

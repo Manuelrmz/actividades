@@ -43,11 +43,12 @@ class usuariosController extends Controller
                         $permission[$newPermission[$i]] = 1;
                 }
                 $this->_data["permisos"] = $permission;
+                $this->_data["permisos"]["usuario"] = $this->_data["usuario"];
                 $transaction = $db->transaction(function($q)
                 {
                     $q->table('usuarios')->insert(array('usuario'=>$this->_data["usuario"],'contrasenia'=>MD5(SHA1($this->_data["pass1"])),'nombres'=>$this->_data["nombres"],'apellidos'=>$this->_data["apellidos"],
                         'cargo'=>$this->_data["cargo"],'area'=>$this->_data["area"]));
-                    $q->table('permisos')->insert(array_merge($$this->_data["permisos"],array('usuario',$this->_data["usuario"])));
+                    $q->table('permisos')->insert($this->_data["permisos"]);
                 });
                 if($transaction)
                 {

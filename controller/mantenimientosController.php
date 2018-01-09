@@ -15,7 +15,7 @@ class mantenimientosController extends Controller
         if($mantenimientos)
                 echo json_encode(array('ok'=>true,'msg'=>$mantenimientos));
         else
-                echo json_encode(array('ok'=>false,'msg'=>"No se lograron obtener los diagnosticos"));
+                echo json_encode(array('ok'=>false,'msg'=>"No se lograron obtener los mantenimientos"));
         }
         public function getMantenimientosActivos()
         {
@@ -26,7 +26,7 @@ class mantenimientosController extends Controller
         if($mantenimientos)
                 echo json_encode(array('ok'=>true,'msg'=>$mantenimientos));
         else
-                echo json_encode(array('ok'=>false,'msg'=>"No se lograron obtener los diagnosticos"));
+                echo json_encode(array('ok'=>false,'msg'=>"No se lograron obtener los mantenimientos"));
         }
         public function add()
         {

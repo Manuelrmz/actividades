@@ -484,7 +484,7 @@ class queryBuilder
     	$this->mysqliStatement = $this->statement($sql,$bindings);
     	$this->mysqliResult = $this->mysqliStatement->get_result();
     	$this->mysqliStatement->close();
-		$this->mysqliStatement = null;
+	$this->mysqliStatement = null;
     	return $this;
     }
     /**
@@ -498,7 +498,7 @@ class queryBuilder
     	$this->mysqliStatement = $this->statement($queryObject["sql"],$queryObject["bindings"]);
     	$this->mysqliResult = $this->mysqliStatement->get_result();
     	$this->mysqliStatement->close();
-		$this->mysqliStatement = null;
+	$this->mysqliStatement = null;
     	return $this;
     }
     /**
