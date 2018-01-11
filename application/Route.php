@@ -116,6 +116,7 @@ $this->post('programa/getforcombobyejercicio','getProgramasForComboByEjercicio')
 $this->post('catinventario/getfortable','getForTable');
 $this->post('catinventario/update');
 $this->post('catinventario/new');
+$this->post('catinventario/getforcombo','getForComboBox');
 /*modulos facturas*/
 $this->get('facturas');
 $this->post('facturas/add');
@@ -129,12 +130,27 @@ $this->post('proveedores/getrfcforcombo','getForComboRFC');
 $this->post('proveedores/getbyid','getById');
 $this->post('proveedores/add');
 $this->post('proveedores/update');
-/*Categorias inventarios*/
-$this->post('catinventario/getforcombo','getForComboBox');
 /*modulos municipios*/
 $this->post('municipios/getselect','getForComboBox');
 /*Modulos Permisos*/
 $this->post('permisos/getpermissionnames','getPermissionNames');
+/*Modulos inventario*/
+$this->get('inventario');
+/*Catalogo Tipos de Equipo Inventario*/
+$this->post('catteinventario/getfortable','getForTable');
+$this->post('catteinventario/update');
+$this->post('catteinventario/new');
+$this->post('catteinventario/getforcombo','getForComboBox');
+/*Catalogo marcas Inventario*/
+$this->post('catmarcainventario/getfortable','getForTable');
+$this->post('catmarcainventario/update');
+$this->post('catmarcainventario/new');
+$this->post('catmarcainventario/getforcombo','getForComboBox');
+/*Catalogo unidades de medida Inventario*/
+$this->post('catuminventario/getfortable','getForTable');
+$this->post('catuminventario/update');
+$this->post('catuminventario/new');
+$this->post('catuminventario/getforcombo','getForComboBox');
 /*Modulos Manejo de Errores*/
 $this->get('error');
 $this->get('error/error403');

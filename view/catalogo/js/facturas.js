@@ -315,8 +315,313 @@ function complete()
       { command: ["edit"], title: "Acciones", width: 90 },
 	  ],
     editable: "popup"
-  }
-  );
+  });
+  $("#gridTipoEquipo").kendoGrid(
+  {
+    dataSource:new kendo.data.DataSource(
+    {
+      transport:{
+        read: function(e)
+        {
+          $.post(path+"catteinventario/getfortable",function(data)
+          {
+            try
+            {
+              var json = eval("("+data+")");
+              e.success(json.ok ? json.msg : []);
+              if(!json.ok)
+                updateError(json.msg);
+            }
+            catch(err)
+            {
+              updateError("Error cargando los tipos de equipo: "+err+ " data:"+data);
+            }
+          });
+        },
+        update: function(e)
+        {
+          $.post(path+"catteinventario/update",e.data.models[0],function(data)
+          {
+            try
+            {
+              var json = eval("("+data+")");
+              if(json.ok)
+                e.success();
+              else
+                updateError(json.msg);
+            }
+            catch(err)
+            {
+              updateError("Error modificando el tipo de equipo: "+err+ " data:"+data);
+            }
+          });
+        },
+        create: function(e)
+        {
+          $.post(path+"catteinventario/new",e.data.models[0],function(data)
+          {
+            try
+            {
+              var json = eval("("+data+")");
+              if(json.ok)
+              {
+                e.data.models[0].id = json.id;
+                e.success(e.data.models[0]);
+              }
+              else
+                updateError(json.msg);
+            }
+            catch(err)
+            {
+              updateError("Error creando el nuevo tipo de equipo: "+err+ " data:"+data);
+            }
+          });
+        },
+        parameterMap: function(options, operation) {
+            if (operation !== "read" && options.models) {
+                return {models: kendo.stringify(options.models)};
+            }
+        }
+      },
+      schema: {
+          model: {
+              id: "id",
+              fields: {
+                  id: { editable: false, nullable: true },
+                  nombre: { validation: { required: true } },
+                  estado: { type:"boolean",validation: { required: false } }
+              }
+          }
+      },
+      error:function(e)
+      {
+        updateError(e.xhr.responseText);
+      },
+      batch:true,
+      pageSize: 20
+    }),
+    toolbar: ["create"],
+    pageable:
+    {
+      refresh: true,
+      pageSizes: true,
+      buttonCount: 5
+    },
+    height:400,
+    columns: [
+      { field: "nombre",title:'Nombre'},
+      { field: "estado", title:'Estado',template:function(e)
+      {
+        return e.estado ? "Activo" : "Inactivo";
+      }},
+      { command: ["edit"], title: "Acciones", width: 90 },
+    ],
+    editable: "popup"
+  });
+  $("#gridMarcas").kendoGrid(
+  {
+    dataSource:new kendo.data.DataSource(
+    {
+      transport:{
+        read: function(e)
+        {
+          $.post(path+"catmarcainventario/getfortable",function(data)
+          {
+            try
+            {
+              var json = eval("("+data+")");
+              e.success(json.ok ? json.msg : []);
+              if(!json.ok)
+                updateError(json.msg);
+            }
+            catch(err)
+            {
+              updateError("Error cargando las marcas: "+err+ " data:"+data);
+            }
+          });
+        },
+        update: function(e)
+        {
+          $.post(path+"catmarcainventario/update",e.data.models[0],function(data)
+          {
+            try
+            {
+              var json = eval("("+data+")");
+              if(json.ok)
+                e.success();
+              else
+                updateError(json.msg);
+            }
+            catch(err)
+            {
+              updateError("Error modificando la marca: "+err+ " data:"+data);
+            }
+          });
+        },
+        create: function(e)
+        {
+          $.post(path+"catmarcainventario/new",e.data.models[0],function(data)
+          {
+            try
+            {
+              var json = eval("("+data+")");
+              if(json.ok)
+              {
+                e.data.models[0].id = json.id;
+                e.success(e.data.models[0]);
+              }
+              else
+                updateError(json.msg);
+            }
+            catch(err)
+            {
+              updateError("Error creando la marca: "+err+ " data:"+data);
+            }
+          });
+        },
+        parameterMap: function(options, operation) {
+            if (operation !== "read" && options.models) {
+                return {models: kendo.stringify(options.models)};
+            }
+        }
+      },
+      schema: {
+          model: {
+              id: "id",
+              fields: {
+                  id: { editable: false, nullable: true },
+                  nombre: { validation: { required: true } },
+                  estado: { type:"boolean",validation: { required: false } }
+              }
+          }
+      },
+      error:function(e)
+      {
+        updateError(e.xhr.responseText);
+      },
+      batch:true,
+      pageSize: 20
+    }),
+    toolbar: ["create"],
+    pageable:
+    {
+      refresh: true,
+      pageSizes: true,
+      buttonCount: 5
+    },
+    height:400,
+    columns: [
+      { field: "nombre",title:'Nombre'},
+      { field: "estado", title:'Estado',template:function(e)
+      {
+        return e.estado ? "Activo" : "Inactivo";
+      }},
+      { command: ["edit"], title: "Acciones", width: 90 },
+    ],
+    editable: "popup"
+  });
+  $("#gridUM").kendoGrid(
+  {
+    dataSource:new kendo.data.DataSource(
+    {
+      transport:{
+        read: function(e)
+        {
+          $.post(path+"catuminventario/getfortable",function(data)
+          {
+            try
+            {
+              var json = eval("("+data+")");
+              e.success(json.ok ? json.msg : []);
+              if(!json.ok)
+                updateError(json.msg);
+            }
+            catch(err)
+            {
+              updateError("Error cargando las unidades de medida: "+err+ " data:"+data);
+            }
+          });
+        },
+        update: function(e)
+        {
+          $.post(path+"catuminventario/update",e.data.models[0],function(data)
+          {
+            try
+            {
+              var json = eval("("+data+")");
+              if(json.ok)
+                e.success();
+              else
+                updateError(json.msg);
+            }
+            catch(err)
+            {
+              updateError("Error modificando la unidad de medida: "+err+ " data:"+data);
+            }
+          });
+        },
+        create: function(e)
+        {
+          $.post(path+"catuminventario/new",e.data.models[0],function(data)
+          {
+            try
+            {
+              var json = eval("("+data+")");
+              if(json.ok)
+              {
+                e.data.models[0].id = json.id;
+                e.success(e.data.models[0]);
+              }
+              else
+                updateError(json.msg);
+            }
+            catch(err)
+            {
+              updateError("Error creando la unidad de medida: "+err+ " data:"+data);
+            }
+          });
+        },
+        parameterMap: function(options, operation) {
+            if (operation !== "read" && options.models) {
+                return {models: kendo.stringify(options.models)};
+            }
+        }
+      },
+      schema: {
+          model: {
+              id: "id",
+              fields: {
+                  id: { editable: false, nullable: true },
+                  nombre: { validation: { required: true } },
+                  estado: { type:"boolean",validation: { required: false } }
+              }
+          }
+      },
+      error:function(e)
+      {
+        updateError(e.xhr.responseText);
+      },
+      batch:true,
+      pageSize: 20
+    }),
+    toolbar: ["create"],
+    pageable:
+    {
+      refresh: true,
+      pageSizes: true,
+      buttonCount: 5
+    },
+    height:400,
+    columns: [
+      { field: "nombre",title:'Nombre'},
+      { field: "estado", title:'Estado',template:function(e)
+      {
+        return e.estado ? "Activo" : "Inactivo";
+      }},
+      { command: ["edit"], title: "Acciones", width: 90 },
+    ],
+    editable: "popup"
+  });
   useBoxMessage = true;
 }
 $(document).ready(complete);
