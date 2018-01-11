@@ -123,7 +123,7 @@ function saveProveedor(e)
 {
   e.preventDefault();
   var condi = true;
-  condi = condi && validarTamanio($("#rfc").val(),"RFC",13,13);
+  condi = condi && validarTamanio($("#rfc").val(),"RFC",12,13);
   condi = condi && validarNoVacio($("#nombreEmpresa").val(),"Nombre de la Empresa");
   if(bandModificar)
     condi = condi && confirm("¿Realmente desea modificar el proveedor?");

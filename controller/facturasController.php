@@ -25,11 +25,7 @@ class facturasController extends Controller
     $condi = $condi && $this->_validar->Date($this->_data["fecha"],"Fecha Factura");
     $condi = $condi && $this->_validar->MinMax($this->_data["noFactura"],1,50,"No. Factura");
     $condi = $condi && $this->_validar->MinMax($this->_data["condiPago"],1,100,"Condicion de Pago");
-    $condi = $condi && $this->_validar->Date($this->_data["fechaEntrega"],"Fecha de Entrega");
     $condi = $condi && $this->_validar->Int($this->_data["rfc"],"RFC Proveedor");
-    $condi = $condi && $this->_validar->MinMax($this->_data["vendedor"],1,200,"Vendedor");
-    $condi = $condi && $this->_validar->MinMax($this->_data["comprador"],1,200,"Comprador");
-    $condi = $condi && $this->_validar->MinMax($this->_data["responsable"],1,200,"Responsable");
     $condi = $condi && $this->_validar->Int($this->_data["ejercicio"],"Ejercicio");
     $condi = $condi && $this->_validar->Int($this->_data["programa"],"Programa");
     $condi = $condi && $this->_validar->Int($this->_data["area"],"Area");
@@ -121,11 +117,7 @@ class facturasController extends Controller
     $condi = $condi && $this->_validar->Date($this->_data["fecha"],"Fecha Factura");
     $condi = $condi && $this->_validar->MinMax($this->_data["noFactura"],1,50,"No. Factura");
     $condi = $condi && $this->_validar->MinMax($this->_data["condiPago"],1,100,"Condicion de Pago");
-    $condi = $condi && $this->_validar->Date($this->_data["fechaEntrega"],"Fecha de Entrega");
     $condi = $condi && $this->_validar->Int($this->_data["rfc"],"RFC Proveedor");
-    $condi = $condi && $this->_validar->MinMax($this->_data["vendedor"],1,200,"Vendedor");
-    $condi = $condi && $this->_validar->MinMax($this->_data["comprador"],1,200,"Comprador");
-    $condi = $condi && $this->_validar->MinMax($this->_data["responsable"],1,200,"Responsable");
     $condi = $condi && $this->_validar->Int($this->_data["ejercicio"],"Ejercicio");
     $condi = $condi && $this->_validar->Int($this->_data["programa"],"Programa");
     $condi = $condi && $this->_validar->Int($this->_data["area"],"Area");
@@ -292,7 +284,7 @@ class facturasController extends Controller
     $this->_data["noFactura"] = isset($data["noFactura"]) ? $data["noFactura"] : "";
     $this->_data["vendedor"] = isset($data["vendedor"]) ? $data["vendedor"] : "";
     $this->_data["comprador"] = isset($data["comprador"]) ? $data["comprador"] : "";
-    $this->_data["fechaEntrega"] = isset($data["fechaEntrega"]) ? $data["fechaEntrega"] : "";
+    $this->_data["fechaEntrega"] = isset($data["fechaEntrega"]) ? ($data["fechaEntrega"] !== "" ? $data["fechaEntrega"] : null) : null;
     $this->_data["condiPago"] = isset($data["condiPago"]) ? $data["condiPago"] : "";
     $this->_data["responsable"] = isset($data["responsable"]) ? $data["responsable"] : "";
     $this->_data["ejercicio"] = isset($data["ejercicio"]) ? (integer)$data["ejercicio"] : 0;

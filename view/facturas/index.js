@@ -110,11 +110,7 @@ function saveFactura(e)
   condi = condi && validarFecha($("#fecha").val(),"Seleccione la fecha de la factura");
   condi = condi && validarTamanio($("#noFactura").val(),"No. Factura",1,50);
   condi = condi && validarTamanio($("#condiPago").val(),"Condicion Pago",1,100);
-  condi = condi && validarFecha($("#fechaEntrega").val(),"Seleccione la fecha de entrega");
   condi = condi && validarComboBox($("#rfc option:selected"),undefined,"Seleccione un RFC correcto de la lista");
-  condi = condi && validarTamanio($("#vendedor").val(),"Vendedor",1,200);
-  condi = condi && validarTamanio($("#comprador").val(),"Comprador",1,200);
-  condi = condi && validarTamanio($("#responsable").val(),"Responsable",1,200);
   condi = condi && validarComboBox($("#ejercicio option:selected"),undefined,"Seleccione un ejercicio correcto");
   condi = condi && validarComboBox($("#programa option:selected"),undefined,"Seleccione un programa correcto");
   condi = condi && validarComboBox($("#area option:selected"),undefined,"Seleccione un area correcta");
@@ -273,7 +269,7 @@ function saveProveedor(e)
 {
   e.preventDefault();
   var condi = true;
-  condi = condi && validarTamanio($("#rfcProveedor").val(),"RFC",13,13);
+  condi = condi && validarTamanio($("#rfcProveedor").val(),"RFC",12,13);
   condi = condi && validarNoVacio($("#nombreProveedor").val(),"Nombre de la empresa");
   if(condi)
   {
@@ -466,14 +462,14 @@ function getCategoriesInventario()
                       fields: {
                           idInventario: { editable: false, nullable: true },
                           cantidad: { type:"number", validation: { required: true } },
-                          codigo: { validation: { required: true } },
+                          codigo: { validation: { required: false } },
                           categoria: {type:"number", validation: { required: true } },
                           tipoEquipo: { validation: { required: true } },
                           marca: { validation: { required: true } },
                           modelo: { validation: { required: true } },
                           noSerie: { validation: { required: true } },
                           um: { validation: { required: true } },
-                          descripcion: { validation: { required: true } }
+                          descripcion: { validation: { required: false } }
                       }
                   }
               }

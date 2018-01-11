@@ -21,7 +21,7 @@ class proveedoresController extends Controller
     $this->proveedor($_POST);
     $db = new queryBuilder();
     $condi = true;
-    $condi = $condi && $this->_validar->MinMax($this->_data["rfc"],13,13,"RFC");
+    $condi = $condi && $this->_validar->MinMax($this->_data["rfc"],12,13,"RFC");
     $condi = $condi && $this->_validar->NoEmpty($this->_data["nombreEmpresa"],"Nombre de la empresa");
     if($condi)
     {
@@ -61,7 +61,7 @@ class proveedoresController extends Controller
     $db = new queryBuilder();
     $condi = true;
     $condi = $condi && $this->_validar->Int($this->_data["id"],"ID");
-    $condi = $condi && $this->_validar->MinMax($this->_data["rfc"],13,13,"RFC");
+    $condi = $condi && $this->_validar->MinMax($this->_data["rfc"],12,13,"RFC");
     $condi = $condi && $this->_validar->NoEmpty($this->_data["nombreEmpresa"],"Nombre de la empresa");
     if($condi)
     {
