@@ -64,7 +64,7 @@ class catteinventarioController extends Controller
 	    }
 	    else
 			$this->_return["msg"] = "Tipos de Equipo no encontrados";
-	    echo json_encode($this->_return);
+    	echo json_encode($this->_return);
 	}
 	public function getForComboBox()
 	{

@@ -123,6 +123,7 @@ $this->post('facturas/add');
 $this->post('facturas/update');
 $this->post('facturas/getbyid');
 $this->post('facturas/getfortable');
+$this->post('facturas/getcatfortable','getCatalogsForTable');
 /*modulos proveedores*/
 $this->get('proveedores');
 $this->post('proveedores/getfortable');
