@@ -8,7 +8,7 @@
 <div class="col-sm-12 div-border">
 	<div class="col-sm-12 text-center margin-form"><h3>Modulo de Inventario</h3></div>
 	<div class="col-sm-12 bold margin-form" id="titleForm">Nuevo Equipo</div>
-	<form>
+	<form enctype="multipart/form-data" id="formInventario" method="post">
 		<div class="col-sm-4">
 			<div class="col-sm-12 bold margin-form">No. Factura</div>
 			<div class="col-sm-12 margin-form"><select id="noFactura" style="width:100%;"></select></div>

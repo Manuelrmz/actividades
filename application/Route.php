@@ -124,6 +124,7 @@ $this->post('facturas/update');
 $this->post('facturas/getbyid');
 $this->post('facturas/getfortable');
 $this->post('facturas/getcatfortable','getCatalogsForTable');
+$this->post('facturas/getforcombo','getForComboBox');
 /*modulos proveedores*/
 $this->get('proveedores');
 $this->post('proveedores/getfortable');
@@ -137,6 +138,9 @@ $this->post('municipios/getselect','getForComboBox');
 $this->post('permisos/getpermissionnames','getPermissionNames');
 /*Modulos inventario*/
 $this->get('inventario');
+$this->post('inventario/add');
+$this->post('inventario/update');
+$this->post('inventario/getbyid');
 $this->post('inventario/getfortable','getForTable');
 /*Catalogo Tipos de Equipo Inventario*/
 $this->post('catteinventario/getfortable','getForTable');
@@ -153,6 +157,8 @@ $this->post('catuminventario/getfortable','getForTable');
 $this->post('catuminventario/update');
 $this->post('catuminventario/new');
 $this->post('catuminventario/getforcombo','getForComboBox');
+/*Catalogo status inventarios*/
+$this->post('catstainventario/getforcombo','getForComboBox');
 /*Modulos Manejo de Errores*/
 $this->get('error');
 $this->get('error/error403');

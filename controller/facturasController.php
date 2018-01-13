@@ -47,6 +47,7 @@ class facturasController extends Controller
                     {
                         unset($equipo["idInventario"]);
                         $equipo["idfactura"] = $this->_data["id"];
+                        $equipo["status"] = 2;
                         $q->table("inventario")->insert($equipo);
                     }
                 }
@@ -140,7 +141,10 @@ class facturasController extends Controller
                         if($equipo["id"] !== null)
                             $q->table("inventario")->where('id',$equipo["id"])->update($equipo);
                         else
+                        {
+                            $equipo["status"] = 2;
                             $q->table("inventario")->insert($equipo);
+                        }
                     }
                 }
                 $deletedEquip = explode(",",$this->_data["deletedEquip"]);
@@ -283,6 +287,20 @@ class facturasController extends Controller
         $this->_return["msg"]["marca"] = inventarioMarca::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->orderBy('nombre','ASC')->get()->fetch_all();
         $this->_return["msg"]["um"] = inventarioUM::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->orderBy('nombre','ASC')->get()->fetch_all();
         $this->_return["ok"] = true;
+        echo json_encode($this->_return);
+    }
+    public function getForComboBox()
+    {
+        Session::regenerateId();
+        Session::securitySession();
+        $facturas = facturas::select(array('id'=>'value','noFactura'=>'text'))->get()->fetch_all();
+        if($facturas)
+        {
+            $this->_return["msg"] = $facturas;
+            $this->_return["ok"] = true;
+        }
+        else
+            $this->_return["msg"] = "No se encontraron facturas";
         echo json_encode($this->_return);
     }
     public function factura($data)

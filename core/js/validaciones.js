@@ -140,6 +140,26 @@ function validarString(valor,mensaje,etiqueta)
     else
 		return true;
 }
+function validarMinInt(valor,min,campo,etiqueta)
+{
+	if(valor < min)
+	{
+		updateError("El campo: "+campo+" debe ser mayor que "+min,etiqueta);
+		return false;
+	}
+    else
+		return true;
+}
+function validarMaxInt(valor,max,campo,etiqueta)
+{
+	if(valor > max)
+	{
+		updateError("El campo: "+campo+" debe ser menor que "+min,etiqueta);
+		return false;
+	}
+    else
+		return true;
+}
 function validarFechaHora(valor,mensaje,etiqueta)
 {
 	if(!regFechaHora.test(valor))
