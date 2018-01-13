@@ -453,7 +453,6 @@ function getCategoriesInventario()
             var json = eval("("+data+")");
             if(json.ok)
             {
-                console.log(json.msg);
                 $("#gridEquipos").kendoGrid(
                 {
                     dataSource: new kendo.data.DataSource(
@@ -469,8 +468,8 @@ function getCategoriesInventario()
                                     categoria: {type:"number", validation: { required: true } },
                                     tipoEquipo: {type:"number", validation: { required: true } },
                                     marca: {type:"number", validation: { required: true } },
-                                    modelo: { validation: { required: true } },
-                                    noSerie: { validation: { required: true } },
+                                    modelo: { validation: { required: false } },
+                                    noSerie: { validation: { required: false } },
                                     um: {type:"number", validation: { required: true } },
                                     descripcion: { validation: { required: false } }
                                 }

@@ -137,6 +137,7 @@ $this->post('municipios/getselect','getForComboBox');
 $this->post('permisos/getpermissionnames','getPermissionNames');
 /*Modulos inventario*/
 $this->get('inventario');
+$this->post('inventario/getfortable','getForTable');
 /*Catalogo Tipos de Equipo Inventario*/
 $this->post('catteinventario/getfortable','getForTable');
 $this->post('catteinventario/update');

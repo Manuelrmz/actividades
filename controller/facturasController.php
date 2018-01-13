@@ -278,10 +278,10 @@ class facturasController extends Controller
         Session::regenerateId();
         Session::securitySession();
         $this->_return["msg"] = array();
-        $this->_return["msg"]["categoria"] = inventarioCategoria::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->get()->fetch_all();
-        $this->_return["msg"]["tipoEquipo"] = inventarioTipoEquipo::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->get()->fetch_all();
-        $this->_return["msg"]["marca"] = inventarioMarca::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->get()->fetch_all();
-        $this->_return["msg"]["um"] = inventarioUM::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->get()->fetch_all();
+        $this->_return["msg"]["categoria"] = inventarioCategoria::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->orderBy('nombre','ASC')->get()->fetch_all();
+        $this->_return["msg"]["tipoEquipo"] = inventarioTipoEquipo::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->orderBy('nombre','ASC')->get()->fetch_all();
+        $this->_return["msg"]["marca"] = inventarioMarca::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->orderBy('nombre','ASC')->get()->fetch_all();
+        $this->_return["msg"]["um"] = inventarioUM::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->orderBy('nombre','ASC')->get()->fetch_all();
         $this->_return["ok"] = true;
         echo json_encode($this->_return);
     }

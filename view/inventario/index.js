@@ -59,6 +59,25 @@ function complete()
 	getTipoEquipoInventario();
 	getMarcasEquipoInventario();
 	getUMInventario();
+	loadTable();
+}
+function loadTable()
+{
+	$.post(path+'inventario/getfortable',function(data)
+	{
+		try
+		{
+			console.log(data);
+			var json = eval("("+data+")");
+			$("#gridInventario").data("kendoGrid").dataSource.data(json.ok ? json.msg : []);
+			if(!json.ok)
+				updateError(json.msg);
+		}
+		catch (e)
+		{
+		  updateError("Data: "+data+" Error:"+e);
+		}
+	});
 }
 function eventTable()
 {
@@ -66,7 +85,7 @@ function eventTable()
 }
 function getCategoriesInventario()
 {
-	$.post('catinventario/getforcombo',function(data)
+	$.post(path+'catinventario/getforcombo',function(data)
 	{
 		try
 		{
@@ -83,7 +102,7 @@ function getCategoriesInventario()
 }
 function getTipoEquipoInventario()
 {
-	$.post('catteinventario/getforcombo',function(data)
+	$.post(path+'catteinventario/getforcombo',function(data)
 	{
 		try
 		{
@@ -100,7 +119,7 @@ function getTipoEquipoInventario()
 }
 function getMarcasEquipoInventario()
 {
-	$.post('catmarcainventario/getforcombo',function(data)
+	$.post(path+'catmarcainventario/getforcombo',function(data)
 	{
 		try
 		{
@@ -117,7 +136,7 @@ function getMarcasEquipoInventario()
 }
 function getUMInventario()
 {
-	$.post('catuminventario/getforcombo',function(data)
+	$.post(path+'catuminventario/getforcombo',function(data)
 	{
 		try
 		{
