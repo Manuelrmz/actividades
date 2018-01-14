@@ -109,6 +109,7 @@ function saveInventario(e)
                     {
                         cleanFieldsInventario();
                         showSuccessBox(json.msg);
+                        loadTable();
                     }
                     else
                         updateError(json.msg);

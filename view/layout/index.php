@@ -142,7 +142,7 @@
 							</div>
 							<?php
 						}
-						if($_SESSION["userData"]["usuariosadmon"] == 1)
+						if($_SESSION["userData"]["usuariosadmon"] == 1 || $_SESSION["userData"]["catalogoGeneral"] == 1)
 						{
 						?>
 							<div class="menu"><a href="#"><span class="glyphicon glyphicon-cog"></span>Herramientas</a>
@@ -152,6 +152,12 @@
 								{
 								?>
 								<div class="submenuoption"><a href="/<?php echo BASE_DIR;?>/usuarios"><span class="glyphicon glyphicon-user"></span>Administrar Usuarios</a></div>
+								<?php
+								}
+								if($_SESSION["userData"]["catalogoGeneral"] == 1)
+								{
+								?>
+									<div class="submenuoption"><a href="/<?php echo BASE_DIR;?>/catalogo"><span class="glyphicon glyphicon-list"></span>Catalogos Generales</a></div>
 								<?php
 								}
 								?>

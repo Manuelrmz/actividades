@@ -30,8 +30,14 @@ $this->post('usuarios/getactivebyarea','getPersonalActivoByArea');
 //Modulos Areas
 $this->post('areas/getall');
 $this->post('areas/operativas','getAreasOperativas');
+$this->post('areas/getfortable','getForTable');
+$this->post('areas/update');
+$this->post('areas/new');
 //Modulos cargosUsuario
 $this->post('cargosusuario/getall');
+$this->post('cargosusuario/getfortable','getForTable');
+$this->post('cargosusuario/update');
+$this->post('cargosusuario/new');
 //Modulos Radios
 $this->get('catalogo');
 $this->get('catalogo/radios');
