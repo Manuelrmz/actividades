@@ -165,6 +165,10 @@ $this->post('catuminventario/new');
 $this->post('catuminventario/getforcombo','getForComboBox');
 /*Catalogo status inventarios*/
 $this->post('catstainventario/getforcombo','getForComboBox');
+/*Modulo Resguardos*/
+$this->get('resguardos');
+/*Modulo Recibos*/
+$this->get('recibos');
 /*Modulos Manejo de Errores*/
 $this->get('error');
 $this->get('error/error403');

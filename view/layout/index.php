@@ -54,7 +54,7 @@
 								<div class="menu"><a href="/<?php echo BASE_DIR;?>/servicios"><span class="glyphicon glyphicon-file"></span>Servicios</a></div>
 								<?php
 								}
-						if($_SESSION["userData"]["factura"] == 1 || $_SESSION["userData"]["proveedor"] == 1 || $_SESSION["userData"]["inventario"] == 1 || $_SESSION["userData"]["catalogoFacturas"] == 1)
+						if($_SESSION["userData"]["factura"] == 1 || $_SESSION["userData"]["proveedor"] == 1 || $_SESSION["userData"]["inventario"] == 1 || $_SESSION["userData"]["catalogoFacturas"] == 1 || $_SESSION["userData"]["resguardos"] == 1 || $_SESSION["userData"]["recibos"] == 1)
 						{
 						?>
 							<div class="menu"><a href="#"><span class="glyphicon glyphicon-menu-down"></span>Gestion de Activos</a>
@@ -76,6 +76,18 @@
 									{
 									?>
 										<div class="submenuoption"><a href="/<?php echo BASE_DIR;?>/inventario"><span class="glyphicon glyphicon-list"></span>Inventario</a></div>
+									<?php
+									}
+									if($_SESSION["userData"]["resguardos"] == 1)
+									{
+										?>
+										<div class="submenuoption"><a href="/<?php echo BASE_DIR;?>/resguardos"><span class="glyphicon glyphicon-inbox"></span>Resguardos</a></div>
+									<?php
+									}
+									if($_SESSION["userData"]["recibos"] == 1)
+									{
+										?>
+										<div class="submenuoption"><a href="/<?php echo BASE_DIR;?>/recibos"><span class="glyphicon glyphicon-inbox"></span>Recibos</a></div>
 									<?php
 									}
 									if($_SESSION["userData"]["catalogoFacturas"] == 1)
