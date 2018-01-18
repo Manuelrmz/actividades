@@ -17,15 +17,15 @@ class resguardosController extends Controller
 	public function resguardo($data)
 	{
 		$this->_data["id"] = isset($data["id"]) ? (integer)$data["id"] : null;
+		$this->_data["idunico"] = isset($data["idunico"]) ? (integer)$data["idunico"] : null;
+		$this->_data["anio"] = isset($data["anio"]) ? (integer)$data["anio"] : null;
 		$this->_data["nombre"] = isset($data["nombre"]) ? $data["nombre"] : "";
-		$this->_data["cargo"] = isset($data["cargo"]) ? $data["cargo"] : "";
 		$this->_data["dependencia"] = isset($data["dependencia"]) ? $data["dependencia"] : "";
-		$this->_data["areaSolicitante"] = isset($data["areaSolicitante"]) ? $data["areaSolicitante"] : "";
-		$this->_data["telefono"] = isset($data["telefono"]) ? $data["telefono"] : "";
-		$this->_data["extension"] = isset($data["extension"]) ? $data["extension"] : "";
-		$this->_data["direccion"] = isset($data["direccion"]) ? $data["direccion"] : "";
+		$this->_data["departamento"] = isset($data["departamento"]) ? $data["departamento"] : "";
+		$this->_data["cargo"] = isset($data["cargo"]) ? $data["cargo"] : "";
+		$this->_data["nota"] = isset($data["nota"]) ? $data["nota"] : "";
 		$this->_data["area"] = isset($data["area"]) ? $data["area"] : "";
-		$this->_data["usuarioAlta"] = isset($data["usuarioAlta"]) ? $data["usuarioAlta"] : "";
+		$this->_data["personal"] = isset($data["personal"]) ? (integer)$data["personal"] : 0;
 	}
 }
 ?>

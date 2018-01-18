@@ -27,6 +27,7 @@ $this->post('usuarios/cambiarcontrasenia');
 $this->post('usuarios/checkuseraccount');
 $this->get('usuarios/createusersession');
 $this->post('usuarios/getactivebyarea','getPersonalActivoByArea');
+$this->post('usuarios/getactivebycurrentusercombo','getActivePersonalAreaByCurrentUserForCombo');
 //Modulos Areas
 $this->post('areas/getall');
 $this->post('areas/operativas','getAreasOperativas');
@@ -148,6 +149,7 @@ $this->post('inventario/add');
 $this->post('inventario/update');
 $this->post('inventario/getbyid');
 $this->post('inventario/getfortable','getForTable');
+$this->post('inventario/getavailablebyuserarea','getAvailableByUserArea');
 /*Catalogo Tipos de Equipo Inventario*/
 $this->post('catteinventario/getfortable','getForTable');
 $this->post('catteinventario/update');

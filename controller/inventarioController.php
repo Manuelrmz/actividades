@@ -121,6 +121,29 @@ class inventarioController extends Controller
 			$this->_return["msg"] = "No se encontraron activos";
 		echo json_encode($this->_return);
 	}
+	public function getAvailableByUserArea()
+	{
+		Session::regenerateId();
+    	Session::securitySession();
+		$activos = inventario::select(array('inventario.id'=>'value','CONCAT(noSerie," ",ite.nombre," ",ic.nombre," ",im.nombre," ",modelo)'=>'text'))
+			->join(array('inventarioCategoria','ic'),'inventario.categoria','=','ic.id','LEFT')
+			->join(array('inventarioMarca','im'),'inventario.marca','=','im.id','LEFT')
+			->join(array('inventarioTipoEquipo','ite'),'inventario.tipoEquipo','=','ite.id','LEFT')
+			->join(array('inventarioUM','ium'),'inventario.um','=','ium.id','LEFT')
+			->join(array('facturas','f'),'inventario.idfactura','=','f.id','LEFT')
+			->join(array('areas','a'),'f.area','=','a.id','LEFT')
+			->where('inventario.status','2')
+			->where('a.clave',$_SESSION["userData"]["area"])
+			->get()->fetch_all();
+		if($activos)
+		{
+			$this->_return["msg"] = $activos;
+			$this->_return["ok"] = true;
+		}
+		else
+			$this->_return["msg"] = "No se encontraron activos";
+		echo json_encode($this->_return);
+	}
 	public function inventario($data)
 	{
 		$this->_data["id"] = isset($data["id"]) ? (integer)$data["id"] : 0;

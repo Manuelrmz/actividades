@@ -312,6 +312,22 @@ class usuariosController extends Controller
         } 
         return $allowedPermission;
     }
+    public function getActivePersonalAreaByCurrentUserForCombo()
+    {
+        Session::regenerateId();
+        Session::securitySession();
+        $usuarios = usuarios::select(array('CONCAT(usuarios.nombres," ",usuarios.apellidos)'=>'text','id'=>'value'))->where('usuarios.area',$_SESSION["userData"]["area"])
+                    ->join('permisos','usuarios.usuario','=','permisos.usuario','LEFT')
+                    ->where('permisos.acceso',1)->get()->fetch_all();
+        if($usuarios)
+        {
+            $this->_return["msg"] = $usuarios;
+            $this->_return["ok"] = true;
+        }
+        else
+            $this->_return["msg"] = "Error obteniendo la lista de usuarios";
+        echo json_encode($this->_return);
+    }
     public function usuario($data)
     {
         $this->_data["usuario"] = isset($data["usuario"]) ? $data["usuario"] : "";
