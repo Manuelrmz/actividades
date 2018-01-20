@@ -34,6 +34,16 @@ class inventarioController extends Controller
 		if($condi)
 		{
 			unset($this->_data["id"]);
+			$noSerieTemporal = inventario::select(array('noSerie'))->where('noSerie','LIKE','S/N-%')->get()->orderBy('noSerie','DESC')->fetch_assoc();
+            if($noSerieTemporal)
+            {
+                $noSerieTemporal = explode('-',$noSerieTemporal["noSerie"]);
+                $noSerieTemporal = (integer)$noSerieTemporal[1] + 1;
+            }
+            else
+                $noSerieTemporal = 1;
+            if($this->_data["noSerie"] === "" && $this->_data["categoria"] == 1)
+            	$this->_data["noSerie"] = 'S/N-'.$noSerieTemporal;
 			$equipo = inventario::insert($this->_data);
 			if($equipo)
 			{
@@ -69,6 +79,16 @@ class inventarioController extends Controller
 		$condi = $condi && $this->_validar->MinInt($this->_data["um"],"1","Debes seleccionar un valor valido del campo Unidad de Medida");
 		if($condi)
 		{
+			$noSerieTemporal = inventario::select(array('noSerie'))->where('noSerie','LIKE','S/N-%')->get()->orderBy('noSerie','DESC')->fetch_assoc();
+            if($noSerieTemporal)
+            {
+                $noSerieTemporal = explode('-',$noSerieTemporal["noSerie"]);
+                $noSerieTemporal = (integer)$noSerieTemporal[1] + 1;
+            }
+            else
+                $noSerieTemporal = 1;
+            if($this->_data["noSerie"] === "" && $this->_data["categoria"] == 1)
+            	$this->_data["noSerie"] = 'S/N-'.$noSerieTemporal;
 			inventario::where('id',$this->_data["id"])->update($this->_data);
 			$this->_return["msg"] = "Equipo modificado correctamente";
 			$this->_return["ok"] = true;
@@ -121,19 +141,18 @@ class inventarioController extends Controller
 			$this->_return["msg"] = "No se encontraron activos";
 		echo json_encode($this->_return);
 	}
-	public function getAvailableByUserArea()
+	public function getAllowedForResguardoCombo()
 	{
 		Session::regenerateId();
     	Session::securitySession();
-		$activos = inventario::select(array('inventario.id'=>'value','CONCAT(noSerie," ",ite.nombre," ",ic.nombre," ",im.nombre," ",modelo)'=>'text'))
-			->join(array('inventarioCategoria','ic'),'inventario.categoria','=','ic.id','LEFT')
-			->join(array('inventarioMarca','im'),'inventario.marca','=','im.id','LEFT')
-			->join(array('inventarioTipoEquipo','ite'),'inventario.tipoEquipo','=','ite.id','LEFT')
-			->join(array('inventarioUM','ium'),'inventario.um','=','ium.id','LEFT')
+		$activos = inventario::select(array('inventario.id'=>'value','inventario.noSerie'=>'text'))
 			->join(array('facturas','f'),'inventario.idfactura','=','f.id','LEFT')
 			->join(array('areas','a'),'f.area','=','a.id','LEFT')
 			->where('inventario.status','2')
 			->where('a.clave',$_SESSION["userData"]["area"])
+			->where('inventario.cantidad',1)
+			->where('inventario.categoria',1)
+			->where('inventario.noSerie','!=','')
 			->get()->fetch_all();
 		if($activos)
 		{

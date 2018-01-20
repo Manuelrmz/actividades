@@ -39,6 +39,14 @@ class facturasController extends Controller
                                               'programa'=>$this->_data["programa"],'area'=>$this->_data["area"]));
                 $this->_data["id"] = $factura;
                 $equipos = null;
+                $noSerieTemporal = $q->table('inventario')->select(array('noSerie'))->where('noSerie','LIKE','S/N-%')->get()->orderBy('noSerie','DESC')->fetch_assoc();
+                if($noSerieTemporal)
+                {
+                    $noSerieTemporal = explode('-',$noSerieTemporal["noSerie"]);
+                    $noSerieTemporal = (integer)$noSerieTemporal[1] + 1;
+                }
+                else
+                    $noSerieTemporal = 1;
                 if($this->_data["equip"] != "")
                     $equipos = json_decode($this->_data["equip"],true);
                 if($equipos)
@@ -46,6 +54,11 @@ class facturasController extends Controller
                     foreach($equipos as $equipo)
                     {
                         unset($equipo["idInventario"]);
+                        if($equipo["noSerie"] === "" && $equipo["categoria"] == 1)
+                        {
+                            $equipo["noSerie"] = $noSerieTemporal;
+                            $noSerieTemporal++;
+                        }
                         $equipo["idfactura"] = $this->_data["id"];
                         $equipo["status"] = 2;
                         $q->table("inventario")->insert($equipo);
@@ -129,6 +142,14 @@ class facturasController extends Controller
                 $factura = $q->table('facturas')->where('id',$this->_data["id"])->update(array('fecha'=>$this->_data["fecha"],'rfc'=>$this->_data["rfc"],'noFactura'=>$this->_data["noFactura"],'vendedor'=>$this->_data["vendedor"],'comprador'=>$this->_data["comprador"],'fechaEntrega'=>$this->_data["fechaEntrega"],
                   'condiPago'=>$this->_data["condiPago"],'responsable'=>$this->_data["responsable"],'ejercicio'=>$this->_data["ejercicio"],'programa'=>$this->_data["programa"],'area'=>$this->_data["area"]));
                 $equipos = null;
+                $noSerieTemporal = $q->table('inventario')->select(array('noSerie'))->where('noSerie','LIKE','S/N-%')->get()->orderBy('noSerie','DESC')->fetch_assoc();
+                if($noSerieTemporal)
+                {
+                    $noSerieTemporal = explode('-',$noSerieTemporal["noSerie"]);
+                    $noSerieTemporal = (integer)$noSerieTemporal[1] + 1;
+                }
+                else
+                    $noSerieTemporal = 1;
                 if($this->_data["equip"] != "")
                     $equipos = json_decode($this->_data["equip"],true);
                 if($equipos)
@@ -138,6 +159,11 @@ class facturasController extends Controller
                         $equipo["id"] = $equipo["idInventario"];
                         $equipo["idfactura"] = $this->_data["id"];
                         unset($equipo["idInventario"]);
+                        if($equipo["noSerie"] === "" && $equipo["categoria"] == 1)
+                        {
+                            $equipo["noSerie"] = 'S/N-'.$noSerieTemporal;
+                            $noSerieTemporal++;
+                        }
                         if($equipo["id"] !== null)
                             $q->table("inventario")->where('id',$equipo["id"])->update($equipo);
                         else
