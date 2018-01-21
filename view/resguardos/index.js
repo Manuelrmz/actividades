@@ -1,4 +1,5 @@
 var equipList = null;
+var bandConsult = false;
 function complete()
 {
 	var listaEquipos = [];
@@ -82,6 +83,7 @@ function complete()
     $("#formResguardo").submit(saveResguardo);
     $("#btnCleanFields").click(cleanFieldsResguardo);
     $("#btnAddEquip").click(addEquipToGrid);
+    loadTable();
 	getPersonal();
 	getAllowedForResguardoCombo();
     getCategoriesInventario();
@@ -89,14 +91,79 @@ function complete()
 function saveResguardo(e)
 {
 	e.preventDefault();
+	if(!bandConsult)
+	{
+		var condi = true;
+		condi = condi && validarTamanio($("#nombre").val(),"Nombre Solicitante",1,200);
+		condi = condi && validarTamanio($("#dependencia").val(),"Dependencia Solicitante",1,150);
+		condi = condi && validarComboBox($("#personal option:selected"),undefined,"Seleccione el personal que entrega los equipos");
+		if($("#gridEquipos").data("kendoGrid").dataSource.data().length == 0)
+		{
+			condi = false;
+			updateError("Debe seleccionar al menos un equipo para asignar al resguardo");
+		}
+		if(condi)
+		{
+			var dataSend = new FormData(this);
+			dataSend.append("equipos",JSON.stringify($("#gridEquipos").data("kendoGrid").dataSource.data()));
+			dataSend.append("personal",$("#personal").data("kendoComboBox").value());
+			$.ajax(
+			{
+				url:path+'resguardos/new',
+				type:"POST",
+				data:dataSend,
+				processData:false,
+				contentType:false,
+				success: function(data)
+				{
+					try
+					{
+						var json = eval("("+data+")");
+						if(json.ok)
+						{
+							cleanFieldsResguardo();
+							loadTable();
+							showSuccessBox(json.msg);
+						}
+						else
+							updateError(json.msg)
+					}
+					catch(err)
+					{
+						updateError("Error: "+err+ " Data: "+data);
+					}
+				},
+				error: function(data)
+				{
+					updateError('Error: '+data);
+				}
+			});
+		}
+	}
+}
+function loadTable()
+{
+	$.post(path+'resguardos/getfortablebyuserarea',function(data)
+	{
+		try
+		{
+			var json = eval("("+data+")");
+			$("#gridResguardos").data("kendoGrid").dataSource.data(json.ok ? json.msg : []);
+			if(!json.ok)
+				updateError(json.msg);
+		}
+		catch(err)
+		{
+			updateError("Ocurrio un error cargando la tabla: "+err+ " data:"+data);
+		}
+	});
 }
 function tableEvent()
 {
 	$("#gridResguardos tbody tr").click(function(e)
     {
         var dataItem = $("#gridResguardos").data("kendoGrid").dataItem("tr[data-uid='"+$(e.currentTarget).closest("tr").data('uid')+"'");
-        console.log(dataItem);
-        /*$.post(path+'facturas/getbyid/'+dataItem.idFactura,function(data)
+        $.post(path+'resguardos/getbyid/'+dataItem.idresguardo,function(data)
         {
             try 
             {
@@ -104,6 +171,17 @@ function tableEvent()
                 if(json.ok)
                 {
                     cleanFieldsResguardo();
+                    bandConsult = true;
+					$("#nombre").val(json.msg.nombre);
+					$("#dependencia").val(json.msg.dependencia);
+					$("#departamento").val(json.msg.departamento);
+					$("#cargo").val(json.msg.cargo);
+					$("#nota").val(json.msg.nota);
+					$("#personal").data("kendoComboBox").value(json.msg.personal);
+					$("#gridEquipos").data("kendoGrid").dataSource.data(json.msg.equipos);
+					$("#gridEquipos").data("kendoGrid").hideColumn(7);
+					$("#btnGuardar").hide();
+					$(".equipsFields").hide();
                 }
                 else
                     updateError(json.msg);
@@ -112,12 +190,14 @@ function tableEvent()
             {
                 updateError("Error: "+e+"\nData:"+data)
             }
-        });*/
+        });
     });
 }
 function removeEquip(e)
 {
-    equipList[equipList.length] = {value:e.model.id,text:e.model.noSerie};
+	var dataItem = $("#gridEquipos").data("kendoGrid").dataItem("tr[data-uid='"+$(e.currentTarget).closest("tr").data('uid')+"'");
+	$("#gridEquipos").data("kendoGrid").dataSource.remove(dataItem);
+    equipList[equipList.length] = {value:dataItem.id,text:dataItem.noSerie};
     $("#equipos").data("kendoComboBox").setDataSource(equipList);
 }
 function addEquipToGrid()
@@ -147,7 +227,19 @@ function addEquipToGrid()
 }
 function cleanFieldsResguardo()
 {
-
+	bandConsult = false;
+	$("#nombre").val("");
+	$("#dependencia").val("");
+	$("#departamento").val("");
+	$("#cargo").val("");
+	$("#nota").val("");
+	$("#personal").data("kendoComboBox").value("");
+	$("#equipos").data("kendoComboBox").value("");
+	$("#gridEquipos").data("kendoGrid").dataSource.data([]);
+	$("#gridEquipos").data("kendoGrid").showColumn(7);
+	$("#btnGuardar").show();
+	$(".equipsFields").show();
+	getAllowedForResguardoCombo();
 }
 function removeItemFromEquipList(value)
 {
@@ -242,10 +334,8 @@ function getCategoriesInventario()
                         { field: "modelo",title:'Modelo',width:120},
                         { field: "noSerie",title:'No. Serie',width:120},
                         { field: "descripcion",title:'Descripcion'},
-                        { command: "destroy", title: "&nbsp;", width: 100 },
-                    ],
-                    editable:true,
-                    remove:removeEquip
+                        { command: [{name:'Eliminar',click:function(e){removeEquip(e)}}],title: "&nbsp;", width: 100 },
+                    ]
                 });
             }
             else

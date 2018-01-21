@@ -12,7 +12,12 @@ class Session
 		{
 			session_regenerate_id();
 			$_SESSION = array();
-			header("Location: /".BASE_DIR.DS."principal/login");
+			if(Session::isAjax())
+			{
+				echo json_encode(array('ok'=>'false','msg'=>'Debes iniciar sesion nuevamente'));
+			}
+			else
+				header("Location: /".BASE_DIR.DS."principal/login");
 			exit;
 		}
 		if (!isset($_SESSION["codigo_seguridad"]))
@@ -24,7 +29,12 @@ class Session
 		{
 			session_regenerate_id();
 			$_SESSION = array();
-			header("Location: /".BASE_DIR.DS."principal/login");
+			if(Session::isAjax())
+			{
+				echo json_encode(array('ok'=>'false','msg'=>'Debes iniciar sesion nuevamente'));	
+			}
+			else
+				header("Location: /".BASE_DIR.DS."principal/login");
 			exit;
 		}
 	}
@@ -36,5 +46,9 @@ class Session
 	{
 		session_regenerate_id();
 	}
+	public static function isAjax()
+    {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+    }
 }
 ?>

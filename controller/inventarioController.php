@@ -34,7 +34,7 @@ class inventarioController extends Controller
 		if($condi)
 		{
 			unset($this->_data["id"]);
-			$noSerieTemporal = inventario::select(array('noSerie'))->where('noSerie','LIKE','S/N-%')->get()->orderBy('noSerie','DESC')->fetch_assoc();
+			$noSerieTemporal = inventario::select(array('noSerie'))->where('noSerie','LIKE','S/N-%')->orderBy('noSerie','DESC')->get()->fetch_assoc();
             if($noSerieTemporal)
             {
                 $noSerieTemporal = explode('-',$noSerieTemporal["noSerie"]);
@@ -42,7 +42,7 @@ class inventarioController extends Controller
             }
             else
                 $noSerieTemporal = 1;
-            if($this->_data["noSerie"] === "" && $this->_data["categoria"] == 1)
+            if($this->_data["noSerie"] === "" && $this->_data["categoria"] == 3)
             	$this->_data["noSerie"] = 'S/N-'.$noSerieTemporal;
 			$equipo = inventario::insert($this->_data);
 			if($equipo)
@@ -79,7 +79,13 @@ class inventarioController extends Controller
 		$condi = $condi && $this->_validar->MinInt($this->_data["um"],"1","Debes seleccionar un valor valido del campo Unidad de Medida");
 		if($condi)
 		{
-			$noSerieTemporal = inventario::select(array('noSerie'))->where('noSerie','LIKE','S/N-%')->get()->orderBy('noSerie','DESC')->fetch_assoc();
+			$haveResguardo = resguardos::select(array('resguardos.id','i.status'))
+							->join(array('resguardosInventario','ri'),'resguardos.id','=','ri.idresguardo','LEFT')
+							->join(array('inventario','i'),'i.id','=','ri.idinventario','LEFT')
+							->where('resguardos.status',1)
+							->where('ri.idinventario',$this->_data["id"])
+							->get()->fetch_assoc();
+			$noSerieTemporal = inventario::select(array('noSerie'))->where('noSerie','LIKE','S/N-%')->orderBy('noSerie','DESC')->get()->fetch_assoc();
             if($noSerieTemporal)
             {
                 $noSerieTemporal = explode('-',$noSerieTemporal["noSerie"]);
@@ -87,10 +93,16 @@ class inventarioController extends Controller
             }
             else
                 $noSerieTemporal = 1;
-            if($this->_data["noSerie"] === "" && $this->_data["categoria"] == 1)
+            if($this->_data["noSerie"] === "" && $this->_data["categoria"] == 3)
             	$this->_data["noSerie"] = 'S/N-'.$noSerieTemporal;
+            if($haveResguardo && ($haveResguardo["status"] != $this->_data["status"]))
+            {
+            	$this->_return["msg"] = "Equipo modificado correctamente, el status no fue modificado por que el equipo se encuentra asignado a un resguardo";
+            	$this->_data["status"] = $haveResguardo["status"];
+            }
+            else
+            	$this->_return["msg"] = "Equipo modificado correctamente";
 			inventario::where('id',$this->_data["id"])->update($this->_data);
-			$this->_return["msg"] = "Equipo modificado correctamente";
 			$this->_return["ok"] = true;
 		}
 		else
@@ -151,7 +163,7 @@ class inventarioController extends Controller
 			->where('inventario.status','2')
 			->where('a.clave',$_SESSION["userData"]["area"])
 			->where('inventario.cantidad',1)
-			->where('inventario.categoria',1)
+			->where('inventario.categoria',3)
 			->where('inventario.noSerie','!=','')
 			->get()->fetch_all();
 		if($activos)

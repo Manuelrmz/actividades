@@ -14,6 +14,71 @@ class recibosController extends Controller
 		$this->validatePermissions('recibos');
 		$this->_view->renderizar('index','C4 - Recibos');
 	}
+	public function new()
+	{	
+		//Tipo 1 = normal, tipo 2 = temporal
+		Session::regenerateId();
+		Session::securitySession();
+		$this->validatePermissions('recibos');
+		$this->resguardo($_POST);
+		$db = new queryBuilder();
+		$bandGuardar = true;
+		$condi = true;
+		$equipos = json_decode($this->_data["equipos"],true);
+		$condi = $condi && $this->_validar->MinInt($this->_data["idresguardo"],1,"Debe seleccionar al menos un equipo para asignar al resguardo");
+		$condi = $condi && $this->_validar->MinInt($this->_data["personal"],1,"Debe seleccionar un personal de la lista");
+		$condi = $condi && $this->_validar->MinMaxInt($this->_data["tipo"],0,1,"El recibo debe ser temporal o normal");
+		$condi = $condi && $this->_validar->Date($this->_data["fechaEntrega"],"Debe enviar una fecha de entrega valida");
+		$condi = $condi && $this->_validar->MinMax($this->_data["nombre"],1,200,"Nombre Solicitante");
+		$condi = $condi && $this->_validar->MinMax($this->_data["dependencia"],1,150,"Dependencia Solicitante");
+		$condi = $condi && $this->_validar->MinInt(sizeof($equipos),1,"Debe seleccionar al menos un equipo para asignar al resguardo");
+		if($condi)
+		{
+			
+			if($this->_data["tipo"] == 1)
+			{
+				$haveTemporal = recibos::select(array('id'))->where('idresguardo',$this->_data["idresguardo"])->where('tipo',0)->where('status',1)->get()->fetch_assoc();
+				if($haveTemporal)
+				{
+					$bandGuardar = false;
+					$this->_return["msg"] = "El resguardo normal que intenta guardar cuenta con un resguardo temporal abierto, finalice ese y vuelva a intentarlo";
+				}
+			}
+			if($bandGuardar)
+			{
+				$this->_data["equipos"] = $equipos;
+				$this->_data["anio"] = date('Y');
+				$idunico = recibos::select(array('idunico'))->where('area',$_SESSION["userData"]["area"])->where('anio',$this->_data["anio"])->orderBy('idunico','DESC')->limit(1)->get()->fetch_assoc();
+				$this->_data["idunico"] = ($idunico ? ((integer)$idunico["idunico"] + 1) : 1);
+				$transaccion = $db->transaction(function($q)
+				{
+					$equipList = $this->_data["equipos"];
+					unset($this->_data["equipos"]);
+					$this->_data["area"] = $_SESSION["userData"]["area"];
+					$this->_data["usuarioAlta"] = $_SESSION["userData"]["usuario"];
+					$this->_data["status"] = $this->_data["tipo"] == 1 ? 0 : 1 ;
+					$recibo = $q->table('recibos')->insert($this->_data);
+					if($this->_data["tipo"] == 1)
+						$q->table('resguardos')->where('id',$this->_data["idresguardo"])->update(array('status'=>0));
+					foreach ($equipList as $equip) {
+						if($this->_data["tipo"] == 0)
+							$q->table('recibosInventario')->insert(array('idrecibo'=>$recibo,'idinventario'=>$equip["id"]));
+						$q->table('inventario')->where('id',$equip["id"])->update(array('status'=>($this->_data["tipo"] == 1 ? 2 : 3)));
+					}
+				});
+				if($transaccion)
+				{
+					$this->_return["msg"] = "Recibo creado correctamente";
+					$this->_return["ok"] = true;
+				}
+				else
+					$this->_return["msg"] = "Ocurrio un error insertando el resguardo: ".$db->getError()["string"];
+			}
+		}
+		else
+			$this->_return["msg"] = $this->_validar->getWarnings();
+		echo json_encode($this->_return);
+	}
 	public function resguardo($data)
 	{
 		$this->_data["id"] = isset($data["id"]) ? (integer)$data["id"] : null;
@@ -30,6 +95,7 @@ class recibosController extends Controller
 		$this->_data["tipo"] = isset($data["tipo"]) ? (integer)$data["tipo"] : 0;
 		$this->_data["status"] = isset($data["status"]) ? (integer)$data["status"] : 0;
 		$this->_data["area"] = isset($data["area"]) ? $data["area"] : "";
+		$this->_data["equipos"] = isset($data["equipos"]) ? $data["equipos"] : "[]";
 	}
 }
 ?>

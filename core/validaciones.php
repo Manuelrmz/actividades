@@ -77,6 +77,16 @@ class validaciones
 		else
 		    return true;
 	}
+	public function MinMaxInt($obj,$min,$max,$mensaje)
+	{
+		if ($obj < $min || $obj > $max ) 
+		{
+		    $this->_mensaje .= $mensaje;
+		    return false;
+		}
+		else
+		    return true;
+	}
 	public function NoEmpty($obj,$nombre)
 	{
 		if (strlen($obj) < 1 ) 

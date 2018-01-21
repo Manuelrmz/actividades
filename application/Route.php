@@ -169,8 +169,15 @@ $this->post('catuminventario/getforcombo','getForComboBox');
 $this->post('catstainventario/getforcombo','getForComboBox');
 /*Modulo Resguardos*/
 $this->get('resguardos');
+$this->post('resguardos/new');
+$this->post('resguardos/getfortablebyuserarea','getForTableByUserArea');
+$this->post('resguardos/getbyid','getById');
+$this->post('resguardos/getopencombo','getOpenForComboBox');
+$this->post('resguardos/getequipfortablebyid','getEquipForTableById');
+$this->post('resguardos/getequipforcomboactivebyid','getEquipForComboActiveById');
 /*Modulo Recibos*/
 $this->get('recibos');
+$this->post('recibos/new');
 /*Modulos Manejo de Errores*/
 $this->get('error');
 $this->get('error/error403');
