@@ -178,6 +178,9 @@ $this->post('resguardos/getequipforcomboactivebyid','getEquipForComboActiveById'
 /*Modulo Recibos*/
 $this->get('recibos');
 $this->post('recibos/new');
+$this->post('recibos/getfortablebyuserarea','getForTableByUserArea');
+$this->post('recibos/getbyid','getById');
+$this->post('recibos/closetemporal','closeReciboTemporalById');
 /*Modulos Manejo de Errores*/
 $this->get('error');
 $this->get('error/error403');

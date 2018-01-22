@@ -16,7 +16,7 @@ class recibosController extends Controller
 	}
 	public function new()
 	{	
-		//Tipo 1 = normal, tipo 2 = temporal
+		//Tipo 1 = normal, tipo 0 = temporal
 		Session::regenerateId();
 		Session::securitySession();
 		$this->validatePermissions('recibos');
@@ -74,6 +74,106 @@ class recibosController extends Controller
 				else
 					$this->_return["msg"] = "Ocurrio un error insertando el resguardo: ".$db->getError()["string"];
 			}
+		}
+		else
+			$this->_return["msg"] = $this->_validar->getWarnings();
+		echo json_encode($this->_return);
+	}
+	public function getForTableByUserArea()
+	{
+		Session::regenerateId();
+		Session::securitySession();
+		$recibos = recibos::select(array('recibos.id'=>'idrecibo','CONCAT("C4-REC/",recibos.idunico,"/",recibos.anio)'=>'idunico','recibos.nombre','recibos.dependencia','recibos.status','recibos.tipo','u.nombres'=>'personal','recibos.fechaAlta'))
+					->join(array('usuarios','u'),'recibos.personal','=','u.id','LEFT')
+					->where('recibos.area',$_SESSION["userData"]["area"])->get()->fetch_all();
+		if($recibos)
+		{
+			$this->_return["msg"] = $recibos;
+			$this->_return["ok"] = true;
+		}
+		else
+			$this->_return["msg"] = "No se encontraron recibos";
+		echo json_encode($this->_return);
+	}
+	public function getById($id)
+	{
+		Session::regenerateId();
+		Session::securitySession();
+		$condi = true;
+		$condi = $condi && $this->_validar->Int($id,"Folio");
+		$condi = $condi && $this->_validar->MinInt($id,1,"Debe enviar un folio valido");
+		if($condi)
+		{
+			$recibo = recibos::select(array('recibos.id','r.id'=>'idresguardo','CONCAT("C4-RES/",r.idunico,"/",r.anio)'=>'folioResguardo','CONCAT("C4-REC/",recibos.idunico,"/",recibos.anio)'=>'idunico','recibos.nombre','recibos.dependencia','recibos.departamento','recibos.cargo','recibos.tipo','recibos.fechaEntrega','recibos.nota','recibos.area','recibos.personal','recibos.status'))
+					->join(array('resguardos','r'),'recibos.idresguardo','=','r.id','LEFT')
+					->where('recibos.id',$id)->get()->fetch_assoc();
+			if($recibo)
+			{
+				if($recibo["tipo"] == 1)
+				{
+					$recibo["equipos"] = inventario::select(array('inventario.id','codigo','categoria','tipoEquipo','marca','modelo','noSerie','descripcion'))
+										->join(array('resguardosInventario','ri'),'inventario.id','=','ri.idinventario','LEFT')
+										->where('ri.idresguardo',$recibo["idresguardo"])->get()->fetch_all();
+				}
+				else if($recibo["tipo"] == 0)
+				{
+					$recibo["equipos"] = inventario::select(array('inventario.id','codigo','categoria','tipoEquipo','marca','modelo','noSerie','descripcion'))
+										->join(array('recibosInventario','ri'),'inventario.id','=','ri.idinventario','LEFT')
+										->where('ri.idrecibo',$id)->get()->fetch_all();
+				}
+				$this->_return["msg"] = $recibo;
+				$this->_return["ok"] = true;
+			}
+			else
+				$this->_return["msg"] = "No se encontro un recibo con el folio enviado";
+		}
+		else
+			$this->_return["msg"] = $this->_validar->getWarnings();
+		echo json_encode($this->_return);
+	}
+	public function closeReciboTemporalById($id)
+	{
+		Session::regenerateId();
+		Session::securitySession();
+		$db = new queryBuilder();
+		$condi = true;
+		$condi = $condi && $this->_validar->Int($id,"Folio");
+		$condi = $condi && $this->_validar->MinInt($id,1,"Debe enviar un folio valido");
+		if($condi)
+		{
+			$this->_data["id"] = $id;
+			$recibo = recibos::select(array('id'))
+						->where('id',$id)
+						->where('area',$_SESSION["userData"]["area"])
+						->where('tipo','0')
+						->where('status','1')
+						->get()->fetch_assoc();
+			if($recibo)
+			{
+				$transaccion = $db->transaction(function($q)
+				{
+					$q->table('recibos')->where('id',$this->_data["id"])->where('area',$_SESSION["userData"]["area"])->where('tipo','0')->where('status','1')->update(array('status'=>0));
+					$equipList = $q->table('inventario')->select(array('inventario.id'))
+									->join(array('recibosInventario','ri'),'inventario.id','=','ri.idinventario','LEFT')
+									->where('ri.idrecibo',$this->_data["id"])->get()->fetch_all();
+					if($equipList)
+					{
+						foreach ($equipList as $equip) 
+						{
+							$q->table('inventario')->where('id',$equip["id"])->update(array('status'=>1));
+						}
+					}
+				});
+				if($transaccion)
+				{
+					$this->_return["msg"] = "Recibo finalizado correctamente";
+					$this->_return["ok"] = true;
+				}
+				else
+					$this->_return["msg"] = "Ocurrio un error finalizando el resguardo temporal: ".$db->getError()["string"];
+			}
+			else
+				$this->_return["msg"] = "No se encontro un recibo con el folio enviado";
 		}
 		else
 			$this->_return["msg"] = $this->_validar->getWarnings();

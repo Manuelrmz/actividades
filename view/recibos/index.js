@@ -1,5 +1,6 @@
 var equipList = null;
 var bandConsult = false;
+var currentId = null;
 function complete()
 {
 	$("#resguardo").kendoComboBox({placeholder:"Seleccione el resguardo",dataTextField:"text",dataValueField:"value",change:restartEquipDiv});
@@ -10,10 +11,90 @@ function complete()
 	$("#equipos").data("kendoComboBox").value("");
 	$("#tipo").kendoComboBox({placeholder:"Seleccione el tipo de recibo",change:loadEquip});
 	$("#tipo").data("kendoComboBox").value("");
+	$("#gridRecibos").kendoGrid(
+    {
+        dataSource: new kendo.data.DataSource(
+        {
+            schema: {
+                model: {
+                    id: "idrecibo",
+                    fields: {
+                        idrecibo: {type: "number", editable: false, nullable: true },
+                        idunico:{},
+                        nombre: {validation: { required: true } },
+                        dependencia: { validation: { required: true } },
+                        tipo: { validation: { required: true } },
+                        fechaAlta:{},
+                        personal:{},
+                        status:{}
+                    }
+                }
+            },
+            pageSize:30
+        }),
+        pageable:
+        {
+            refresh: true,
+            pageSizes: true,
+            buttonCount: 5
+        },
+        height: 512,
+        sortable: true,
+        selectable: true,
+        resizable: true,
+        filterable:
+        {
+            messages:
+            {
+                info:"Mostrar registros que...",
+                filter:"Aplicar",
+                clear:"Limpiar"
+            },
+            extra:false,
+            operators:
+            {
+                string:
+                {
+                    contains:"Contenga...",
+                    startswith:"Empieze con...",
+                    eq:"Sea igual que..."
+                }
+            }
+        },
+        columnMenu:
+        {
+            sortable:false,
+            filterable:true,
+            columns:true,
+            messages:
+            {
+            columns:"Columnas",
+            filter:"Busqueda"
+            }
+        },
+        columns: [
+            { field: "idunico",title:'Folio'},
+            { field: "nombre",title:'Nombre'},
+            { field: "dependencia",title:'Dependencia'},
+            { field: "tipo",title:'Tipo Recibo',template:function(dataItem)
+            {
+            	return dataItem.tipo == 1 ? "Normal" : "Temporal";
+            }},
+            { field: "fechaAlta",title:'Fecha'},
+            { field: "personal",title:'Personal'},
+            { field: "status",title:"Estado",template:function(dataItem)
+            {
+            	return dataItem.status == 1 ? "Activo" : "Finalizado";
+            }}
+        ],
+        dataBound:tableEvent
+    });
 	useBoxMessage = true;
-	$("#btnCleanFields").click(cleanFieldsRecibo);
+	$("#btnCleanFields").click(cleanFieldsResguardo);
     $("#btnAddEquip").click(addEquipToGrid);
     $("#formRecibos").submit(saveRecibo);
+    $("#btnFinish").click(finishRecibo);
+    loadTable();
 	getPersonal();
 	getResguardos();
 	getCategoriesInventario();
@@ -54,8 +135,7 @@ function saveRecibo(e)
 				{
 					try
 					{
-						console.log(data);
-						/*var json = eval("("+data+")");
+						var json = eval("("+data+")");
 						if(json.ok)
 						{
 							cleanFieldsResguardo();
@@ -63,7 +143,7 @@ function saveRecibo(e)
 							showSuccessBox(json.msg);
 						}
 						else
-							updateError(json.msg)*/
+							updateError(json.msg)
 					}
 					catch(err)
 					{
@@ -76,6 +156,102 @@ function saveRecibo(e)
 				}
 			});
 		}
+	}
+}
+function loadTable()
+{
+	$.post(path+'recibos/getfortablebyuserarea',function(data)
+	{
+		try
+		{
+			var json = eval("("+data+")");
+			$("#gridRecibos").data("kendoGrid").dataSource.data(json.ok ? json.msg : []);
+			if(!json.ok)
+				updateError(json.msg);
+		}
+		catch(err)
+		{
+			updateError("Ocurrio un error cargando la tabla: "+err+ " data:"+data);
+		}
+	});
+}
+function tableEvent()
+{
+	$("#gridRecibos tbody tr").click(function(e)
+    {
+        var dataItem = $("#gridRecibos").data("kendoGrid").dataItem("tr[data-uid='"+$(e.currentTarget).closest("tr").data('uid')+"'");
+        $.post(path+'recibos/getbyid/'+dataItem.idrecibo,function(data)
+        {
+            try 
+            {
+                var json = eval("("+data+")");
+                if(json.ok)
+                {
+                    bandConsult = true;
+                    $("#resguardo").data("kendoComboBox").value(json.msg.folioResguardo);
+                    $("#resguardo").data("kendoComboBox").enable(false);
+                    $("#personal").data("kendoComboBox").value(json.msg.personal);
+                    $("#personal").data("kendoComboBox").enable(false);
+                    $("#tipo").data("kendoComboBox").value(json.msg.tipo);
+                    $("#tipo").data("kendoComboBox").enable(false);
+                    $("#fechaEntrega").val(json.msg.fechaEntrega);
+					$("#nombre").val(json.msg.nombre);
+					$("#dependencia").val(json.msg.dependencia);
+					$("#departamento").val(json.msg.departamento);
+					$("#cargo").val(json.msg.cargo);
+					$("#nota").val(json.msg.nota);
+					$("#btnGuardar").hide();
+					$(".equipsFields").hide();
+					$("#divEquipos").show();
+					if(json.msg.tipo == 0 && json.msg.status == 1)
+					{
+						$("#btnFinish").show();
+						currentId = json.msg.id;
+					}
+					else
+					{
+						$("#btnFinish").hide();
+						currentId = null;
+					}
+					$("#gridEquipos").data("kendoGrid").dataSource.data(json.msg.equipos);
+					$("#gridEquipos").data("kendoGrid").hideColumn(7);
+                }
+                else
+                    updateError(json.msg);
+            }
+            catch (e) 
+            {
+                updateError("Error: "+e+"\nData:"+data)
+            }
+        });
+    });
+}
+function finishRecibo()
+{
+	var condi = true;
+	condi = condi && validarEntero(currentId,"Debe enviar un recibo temporal valido");
+	condi = condi && confirm('¿Realmente desea finalizar el recibo?');
+	if(condi)
+	{
+		$.post(path+"recibos/closetemporal/"+currentId,function(data)
+		{
+			try
+			{
+				var json = eval("("+data+")");
+				if(json.ok)
+				{
+					cleanFieldsResguardo();
+					loadTable();
+					showSuccessBox(json.msg);
+				}
+				else
+					updateError(json.msg)
+			}
+			catch(err)
+			{
+				updateError("Error: "+err+ " Data: "+data);
+			}
+		});
 	}
 }
 function restartEquipDiv()
@@ -129,20 +305,28 @@ function loadEquip()
 	else
 		$("#tipo").data("kendoComboBox").value("");
 }
-function cleanFieldsRecibo()
+function cleanFieldsResguardo()
 {
 	bandConsult = false;
+	currentId = null;
+	$("#resguardo").data("kendoComboBox").value("");
+	$("#resguardo").data("kendoComboBox").enable(true);
+	$("#personal").data("kendoComboBox").value("");
+	$("#personal").data("kendoComboBox").enable(true);
+	$("#tipo").data("kendoComboBox").value("");
+	$("#tipo").data("kendoComboBox").enable(true);
+	$("#fechaEntrega").val("");
 	$("#nombre").val("");
 	$("#dependencia").val("");
 	$("#departamento").val("");
 	$("#cargo").val("");
 	$("#nota").val("");
-	$("#personal").data("kendoComboBox").value("");
 	$("#equipos").data("kendoComboBox").value("");
 	$("#btnGuardar").show();
 	$("#gridEquipos").data("kendoGrid").dataSource.data([]);
 	$("#divEquipos").hide();
 	$(".equipsFields").hide();
+	$("#btnFinish").hide();
 	$("#gridEquipos").data("kendoGrid").showColumn(7);
 }
 function removeEquip(e)
@@ -260,7 +444,7 @@ function getCategoriesInventario()
                         pageSizes: true,
                         buttonCount: 5
                     },
-                    height:374,
+                    height:300,
                     columns: [
                         { field: "codigo",title:'Codigo',width:100},
                         { field: "categoria",title:'Categoria',values:json.msg.categoria,width:120},
