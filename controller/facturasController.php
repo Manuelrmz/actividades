@@ -24,7 +24,6 @@ class facturasController extends Controller
         $condi = true;
         $condi = $condi && $this->_validar->Date($this->_data["fecha"],"Fecha Factura");
         $condi = $condi && $this->_validar->MinMax($this->_data["noFactura"],1,50,"No. Factura");
-        $condi = $condi && $this->_validar->MinMax($this->_data["condiPago"],1,100,"Condicion de Pago");
         $condi = $condi && $this->_validar->Int($this->_data["rfc"],"RFC Proveedor");
         $condi = $condi && $this->_validar->Int($this->_data["ejercicio"],"Ejercicio");
         $condi = $condi && $this->_validar->Int($this->_data["programa"],"Programa");

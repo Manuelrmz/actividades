@@ -109,7 +109,6 @@ function saveFactura(e)
     condi = condi && validarEntero(currentId,"La factura que desea modificar tiene una id incorrecta");
     condi = condi && validarFecha($("#fecha").val(),"Seleccione la fecha de la factura");
     condi = condi && validarTamanio($("#noFactura").val(),"No. Factura",1,50);
-    condi = condi && validarTamanio($("#condiPago").val(),"Condicion Pago",1,100);
     condi = condi && validarComboBox($("#rfc option:selected"),undefined,"Seleccione un RFC correcto de la lista");
     condi = condi && validarComboBox($("#ejercicio option:selected"),undefined,"Seleccione un ejercicio correcto");
     condi = condi && validarComboBox($("#programa option:selected"),undefined,"Seleccione un programa correcto");
