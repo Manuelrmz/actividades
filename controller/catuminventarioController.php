@@ -70,7 +70,7 @@ class catuminventarioController extends Controller
 	{
 		Session::regenerateId();
 		Session::securitySession();
-		$um = inventarioUM::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->get()->fetch_all();
+		$um = inventarioUM::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->get()->orderBy('nombre','ASC')->fetch_all();
 		if($um)
 		{
 			$this->_return["msg"] = $um;

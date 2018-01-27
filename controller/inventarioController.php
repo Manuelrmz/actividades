@@ -22,15 +22,11 @@ class inventarioController extends Controller
 		$this->inventario($_POST);
 		$condi = true;
 		$condi = $condi && $this->_validar->Int($this->_data["cantidad"],"Cantidad");
-		$condi = $condi && $this->_validar->Int($this->_data["categoria"],"Categoria");
-		$condi = $condi && $this->_validar->Int($this->_data["tipoEquipo"],"Tipo de Equipo");
-		$condi = $condi && $this->_validar->Int($this->_data["marca"],"Marca");
-		$condi = $condi && $this->_validar->Int($this->_data["um"],"Unidad de Medida");
 		$condi = $condi && $this->_validar->MinInt($this->_data["cantidad"],"1","Debes seleccionar un valor valido del campo Cantidad");
-		$condi = $condi && $this->_validar->MinInt($this->_data["categoria"],"1","Debes seleccionar un valor valido del campo Categoria");
-		$condi = $condi && $this->_validar->MinInt($this->_data["tipoEquipo"],"1","Debes seleccionar un valor valido del campo Tipo de Equipo");
-		$condi = $condi && $this->_validar->MinInt($this->_data["marca"],"1","Debes seleccionar un valor valido del campo Marca");
-		$condi = $condi && $this->_validar->MinInt($this->_data["um"],"1","Debes seleccionar un valor valido del campo Unidad de Medida");
+		$condi = $condi && $this->_validar->MinMax($this->_data["categoria"],1,100,"Categoria");
+		$condi = $condi && $this->_validar->MinMax($this->_data["tipoEquipo"],1,100,"Tipo de Equipo");
+		$condi = $condi && $this->_validar->MinMax($this->_data["marca"],1,100,"Marca");
+		$condi = $condi && $this->_validar->MinMax($this->_data["um"],1,100,"Unidad de Medida");
 		if($condi)
 		{
 			unset($this->_data["id"]);
@@ -42,7 +38,7 @@ class inventarioController extends Controller
             }
             else
                 $noSerieTemporal = 1;
-            if($this->_data["noSerie"] === "" && $this->_data["categoria"] == 3)
+            if($this->_data["noSerie"] === "" && $this->_data["categoria"] == "EQUIPO")
             	$this->_data["noSerie"] = 'S/N-'.$noSerieTemporal;
 			$equipo = inventario::insert($this->_data);
 			if($equipo)
@@ -68,15 +64,11 @@ class inventarioController extends Controller
 		$condi = $condi && $this->_validar->Int($this->_data["id"],"Folio");
 		$condi = $condi && $this->_validar->MinInt($this->_data["id"],"1","Debes enviar un equipo con Folio Valido");
 		$condi = $condi && $this->_validar->Int($this->_data["cantidad"],"Cantidad");
-		$condi = $condi && $this->_validar->Int($this->_data["categoria"],"Categoria");
-		$condi = $condi && $this->_validar->Int($this->_data["tipoEquipo"],"Tipo de Equipo");
-		$condi = $condi && $this->_validar->Int($this->_data["marca"],"Marca");
-		$condi = $condi && $this->_validar->Int($this->_data["um"],"Unidad de Medida");
 		$condi = $condi && $this->_validar->MinInt($this->_data["cantidad"],"1","Debes seleccionar un valor valido del campo Cantidad");
-		$condi = $condi && $this->_validar->MinInt($this->_data["categoria"],"1","Debes seleccionar un valor valido del campo Categoria");
-		$condi = $condi && $this->_validar->MinInt($this->_data["tipoEquipo"],"1","Debes seleccionar un valor valido del campo Tipo de Equipo");
-		$condi = $condi && $this->_validar->MinInt($this->_data["marca"],"1","Debes seleccionar un valor valido del campo Marca");
-		$condi = $condi && $this->_validar->MinInt($this->_data["um"],"1","Debes seleccionar un valor valido del campo Unidad de Medida");
+		$condi = $condi && $this->_validar->MinMax($this->_data["categoria"],1,100,"Categoria");
+		$condi = $condi && $this->_validar->MinMax($this->_data["tipoEquipo"],1,100,"Tipo de Equipo");
+		$condi = $condi && $this->_validar->MinMax($this->_data["marca"],1,100,"Marca");
+		$condi = $condi && $this->_validar->MinMax($this->_data["um"],1,100,"Unidad de Medida");
 		if($condi)
 		{
 			$haveResguardo = resguardos::select(array('resguardos.id','i.status'))
@@ -93,7 +85,7 @@ class inventarioController extends Controller
             }
             else
                 $noSerieTemporal = 1;
-            if($this->_data["noSerie"] === "" && $this->_data["categoria"] == 3)
+            if($this->_data["noSerie"] === "" && $this->_data["categoria"] == "EQUIPO")
             	$this->_data["noSerie"] = 'S/N-'.$noSerieTemporal;
             if($haveResguardo && ($haveResguardo["status"] != $this->_data["status"]))
             {
@@ -138,11 +130,7 @@ class inventarioController extends Controller
 		Session::regenerateId();
     	Session::securitySession();
 		$this->validatePermissions('inventario');
-		$activos = inventario::select(array('inventario.id'=>'idInventario','cantidad','codigo','ic.nombre'=>'categoria','ite.nombre'=>'tipoEquipo','im.nombre'=>'marca','modelo','noSerie','ium.nombre'=>'um','inventario.descripcion'))
-			->join(array('inventarioCategoria','ic'),'inventario.categoria','=','ic.id','LEFT')
-			->join(array('inventarioMarca','im'),'inventario.marca','=','im.id','LEFT')
-			->join(array('inventarioTipoEquipo','ite'),'inventario.tipoEquipo','=','ite.id','LEFT')
-			->join(array('inventarioUM','ium'),'inventario.um','=','ium.id','LEFT')
+		$activos = inventario::select(array('id'=>'idInventario','cantidad','codigo','categoria','tipoEquipo','marca','modelo','noSerie','um','descripcion'))
 			->get()->fetch_all();
 		if($activos)
 		{
@@ -163,7 +151,7 @@ class inventarioController extends Controller
 			->where('inventario.status','2')
 			->where('a.clave',$_SESSION["userData"]["area"])
 			->where('inventario.cantidad',1)
-			->where('inventario.categoria',3)
+			->where('inventario.categoria',"EQUIPO")
 			->where('inventario.noSerie','!=','')
 			->get()->fetch_all();
 		if($activos)
@@ -181,12 +169,12 @@ class inventarioController extends Controller
 		$this->_data["idfactura"] = isset($data["idfactura"]) ? ((integer)$data["idfactura"] > 0 ? (integer)$data["idfactura"] : null ) : null;
 		$this->_data["cantidad"] = isset($data["cantidad"]) ? (integer)$data["cantidad"] : 0;
 		$this->_data["codigo"] = isset($data["codigo"]) ? $data["codigo"] : "";
-		$this->_data["categoria"] = isset($data["categoria"]) ? (integer)$data["categoria"] : 0;
-		$this->_data["tipoEquipo"] = isset($data["tipoEquipo"]) ? (integer)$data["tipoEquipo"] : 0;
-		$this->_data["marca"] = isset($data["marca"]) ? (integer)$data["marca"] : 0;
+		$this->_data["categoria"] = isset($data["categoria"]) ? $data["categoria"] : "";
+		$this->_data["tipoEquipo"] = isset($data["tipoEquipo"]) ? $data["tipoEquipo"] : "";
+		$this->_data["marca"] = isset($data["marca"]) ? $data["marca"] : "";
 		$this->_data["modelo"] = isset($data["modelo"]) ? $data["modelo"] : "";
 		$this->_data["noSerie"] = isset($data["noSerie"]) ? $data["noSerie"] : "";
-		$this->_data["um"] = isset($data["um"]) ? (integer)$data["um"] : 0;
+		$this->_data["um"] = isset($data["um"]) ? $data["um"] : "";
 		$this->_data["descripcion"] = isset($data["descripcion"]) ? $data["descripcion"] : "";
 		$this->_data["status"] = isset($data["status"]) ? ((integer)$data["status"] > 0 ? (integer)$data["status"] : 2) : 2;
 	}

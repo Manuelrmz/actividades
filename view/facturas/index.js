@@ -2,6 +2,9 @@ var deletedEquip = [];
 var bandModificar = false;
 var currentId = null;
 var categoriesInventario = null;
+var marcaInventario = null;
+var tipoEquipoInventario = null;
+var umInventario = null;
 function complete()
 {
     $("#rfc").kendoComboBox({placeholder:"Seleccione un RFC",dataTextField:"text",dataValueField:"value",change:getProveedor});
@@ -89,6 +92,63 @@ function complete()
             { field: "area",title:'Area'}
         ],
         dataBound:tableEvent
+    });
+    $("#gridEquipos").kendoGrid(
+    {
+        dataSource: new kendo.data.DataSource(
+        {
+            pageSize: 20,
+            schema: {
+                model: {
+                    id: "idInventario",
+                    fields: {
+                        idInventario: { editable: false, nullable: true },
+                        cantidad: { type:"number", validation: { required: true } },
+                        codigo: { validation: { required: false } },
+                        categoria: {validation: { required: true } },
+                        tipoEquipo: {validation: { required: true } },
+                        marca: {validation: { required: true } },
+                        modelo: { validation: { required: false } },
+                        noSerie: { validation: { required: false } },
+                        um: {validation: { required: true } },
+                        descripcion: { validation: { required: false } }
+                    }
+                }
+            }
+        }),
+        toolbar: ["create"],
+        pageable:
+        {
+            refresh: true,
+            pageSizes: true,
+            buttonCount: 5
+        },
+        height:374,
+        columns: [
+            { field: "cantidad",title:'Cant.',width:80},
+            { field: "codigo",title:'Codigo',width:100},
+            { field: "categoria",title:'Categoria',editor:categoriaAutoCompleteEditor,width:120},
+            { field: "tipoEquipo",title:'Tipo de Equipo', editor:tipoEquipoAutoCompleteEditor,width:120},
+            { field: "marca",title:'Marca', editor:marcaAutoCompleteEditor,width:120},
+            { field: "modelo",title:'Modelo',width:120},
+            { field: "noSerie",title:'No. Serie',width:120},
+            { field: "um",title:'U/M', editor:umAutoCompleteEditor,width:100},
+            { field: "descripcion",title:'Descripcion'},
+            { command: "destroy", title: "&nbsp;", width: 100 },
+        ],
+        remove:removeEquip,
+        editable: true,
+        edit:function(e)
+        {
+            if(e.model.isNew())
+            {
+                if(e.container.find("input[name=cantidad]").data("kendoNumericTextBox"))
+                {
+                    e.model.cantidad = 1;
+                    e.container.find("input[name=cantidad]").data("kendoNumericTextBox").value(1);
+                }
+            }
+        }
     });
     useBoxMessage = true;
     $("#formProveedor").submit(saveProveedor);
@@ -452,60 +512,62 @@ function getCategoriesInventario()
             var json = eval("("+data+")");
             if(json.ok)
             {
-                $("#gridEquipos").kendoGrid(
-                {
-                    dataSource: new kendo.data.DataSource(
-                    {
-                        pageSize: 20,
-                        schema: {
-                            model: {
-                                id: "idInventario",
-                                fields: {
-                                    idInventario: { editable: false, nullable: true },
-                                    cantidad: { type:"number", validation: { required: true } },
-                                    codigo: { validation: { required: false } },
-                                    categoria: {type:"number", validation: { required: true } },
-                                    tipoEquipo: {type:"number", validation: { required: true } },
-                                    marca: {type:"number", validation: { required: true } },
-                                    modelo: { validation: { required: false } },
-                                    noSerie: { validation: { required: false } },
-                                    um: {type:"number", validation: { required: true } },
-                                    descripcion: { validation: { required: false } }
-                                }
-                            }
-                        }
-                    }),
-                    toolbar: ["create"],
-                    pageable:
-                    {
-                        refresh: true,
-                        pageSizes: true,
-                        buttonCount: 5
-                    },
-                    height:374,
-                    columns: [
-                        { field: "cantidad",title:'Cant.',width:80},
-                        { field: "codigo",title:'Codigo',width:100},
-                        { field: "categoria",title:'Categoria',values:json.msg.categoria,width:120},
-                        { field: "tipoEquipo",title:'Tipo de Equipo',values:json.msg.tipoEquipo,width:120},
-                        { field: "marca",title:'Marca',values:json.msg.marca,width:120},
-                        { field: "modelo",title:'Modelo',width:120},
-                        { field: "noSerie",title:'No. Serie',width:120},
-                        { field: "um",title:'U/M',values:json.msg.um,width:100},
-                        { field: "descripcion",title:'Descripcion'},
-                        { command: "destroy", title: "&nbsp;", width: 100 },
-                    ],
-                    remove:removeEquip,
-                    editable: true
-                });
+                categoriesInventario = json.msg.categoria;
+                marcaInventario = json.msg.marca;
+                tipoEquipoInventario = json.msg.tipoEquipo;
+                umInventario = json.msg.um;
             }
             else
-                updateError("Ocurrio un error obteniendo la lista de las categorias de los equipos, por lo que no se crea la tabla de equipos");
+                updateError("Ocurrio un error obteniendo la lista de las categorias de los equipos");
         }
         catch (e)
         {
             updateError("Data: "+data+" Error:"+e);
         }
+    });
+}
+function categoriaAutoCompleteEditor(container,options)
+{
+    $('<input required data-bind="value:' + options.field + '"/>')
+        .appendTo(container)
+        .kendoAutoComplete({
+        dataSource: categoriesInventario,
+        dataTextField: "text",
+        filter: "contains",
+        minLength: 1
+    });
+}
+function tipoEquipoAutoCompleteEditor(container,options)
+{
+    $('<input required data-bind="value:' + options.field + '"/>')
+        .appendTo(container)
+        .kendoAutoComplete({
+        dataSource: tipoEquipoInventario,
+        dataTextField: "text",
+        filter: "contains",
+        minLength: 1
+    });
+}
+function marcaAutoCompleteEditor(container,options)
+{
+    $('<input required data-bind="value:' + options.field + '"/>')
+        .appendTo(container)
+        .kendoAutoComplete({
+        dataSource: marcaInventario,
+        dataTextField: "text",
+        filter: "contains",
+        minLength: 1
+    });
+}
+function umAutoCompleteEditor(container,options)
+{
+    $('<input required data-bind="value:' + options.field + '"/>')
+        .appendTo(container)
+        .kendoAutoComplete({
+        dataSource: umInventario,
+        dataTextField: "text",
+        filter: "contains",
+        minLength: 1
     });
 }
 $(document).ready(complete);

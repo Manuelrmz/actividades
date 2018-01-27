@@ -53,7 +53,7 @@ class facturasController extends Controller
                     foreach($equipos as $equipo)
                     {
                         unset($equipo["idInventario"]);
-                        if($equipo["noSerie"] === "" && $equipo["categoria"] == 3)
+                        if($equipo["noSerie"] === "" && $equipo["categoria"] == "EQUIPO")
                         {
                             $equipo["noSerie"] = $noSerieTemporal;
                             $noSerieTemporal++;
@@ -129,7 +129,6 @@ class facturasController extends Controller
         $condi = $condi && $this->_validar->Int($this->_data["id"],"ID");
         $condi = $condi && $this->_validar->Date($this->_data["fecha"],"Fecha Factura");
         $condi = $condi && $this->_validar->MinMax($this->_data["noFactura"],1,50,"No. Factura");
-        $condi = $condi && $this->_validar->MinMax($this->_data["condiPago"],1,100,"Condicion de Pago");
         $condi = $condi && $this->_validar->Int($this->_data["rfc"],"RFC Proveedor");
         $condi = $condi && $this->_validar->Int($this->_data["ejercicio"],"Ejercicio");
         $condi = $condi && $this->_validar->Int($this->_data["programa"],"Programa");
@@ -144,7 +143,6 @@ class facturasController extends Controller
                 $noSerieTemporal = $q->table('inventario')->select(array('noSerie'))->where('noSerie','LIKE','S/N-%')->orderBy('noSerie','DESC')->get()->fetch_assoc();
                 if($noSerieTemporal)
                 {
-                    //var_dump($noSerieTemporal);
                     $noSerieTemporal = explode('-',$noSerieTemporal["noSerie"]);
                     $noSerieTemporal = (integer)$noSerieTemporal[1] + 1;
                 }
@@ -159,7 +157,7 @@ class facturasController extends Controller
                         $equipo["id"] = $equipo["idInventario"];
                         $equipo["idfactura"] = $this->_data["id"];
                         unset($equipo["idInventario"]);
-                        if($equipo["noSerie"] === "" && $equipo["categoria"] == 3)
+                        if($equipo["noSerie"] === "" && $equipo["categoria"] == "EQUIPO")
                         {
                             $equipo["noSerie"] = 'S/N-'.$noSerieTemporal;
                             $noSerieTemporal++;

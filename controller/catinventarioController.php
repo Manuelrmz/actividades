@@ -70,7 +70,7 @@ class catinventarioController extends Controller
     {
         Session::regenerateId();
         Session::securitySession();
-        $categorias = inventarioCategoria::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->get()->fetch_all();
+        $categorias = inventarioCategoria::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->orderBy('nombre','ASC')->get()->fetch_all();
         if($categorias)
         {
             $this->_return["msg"] = $categorias;

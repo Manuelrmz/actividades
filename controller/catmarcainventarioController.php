@@ -70,7 +70,7 @@ class catmarcainventarioController extends Controller
 	{
 		Session::regenerateId();
 		Session::securitySession();
-		$marcas = inventarioMarca::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->get()->fetch_all();
+		$marcas = inventarioMarca::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->orderBy('nombre','ASC')->get()->fetch_all();
 		if($marcas)
 		{
 			$this->_return["msg"] = $marcas;

@@ -70,7 +70,7 @@ class catteinventarioController extends Controller
 	{
 		Session::regenerateId();
 		Session::securitySession();
-		$tiposEquipo = inventarioTipoEquipo::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->get()->fetch_all();
+		$tiposEquipo = inventarioTipoEquipo::select(array('id'=>'value','nombre'=>'text'))->where('estado','1')->orderBy('nombre','ASC')->get()->fetch_all();
 		if($tiposEquipo)
 		{
 			$this->_return["msg"] = $tiposEquipo;

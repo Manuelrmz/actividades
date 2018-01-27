@@ -87,10 +87,10 @@ function saveInventario(e)
 	{	
 		var dataSend = new FormData(this);
 		dataSend.set('idfactura',$("#noFactura").data("kendoComboBox").value());
-		dataSend.set('categoria',$("#categoria").data("kendoComboBox").value());
-		dataSend.set('tipoEquipo',$("#tipoEquipo").data("kendoComboBox").value());
-		dataSend.set('marca',$("#marca").data("kendoComboBox").value());
-		dataSend.set('um',$("#um").data("kendoComboBox").value());
+		dataSend.set('categoria',$("#categoria").data("kendoComboBox").text());
+		dataSend.set('tipoEquipo',$("#tipoEquipo").data("kendoComboBox").text());
+		dataSend.set('marca',$("#marca").data("kendoComboBox").text());
+		dataSend.set('um',$("#um").data("kendoComboBox").text());
 		if(bandModificar)
 			dataSend.append('id',currentId);
 		$.ajax(

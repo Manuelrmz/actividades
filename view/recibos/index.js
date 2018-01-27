@@ -89,6 +89,45 @@ function complete()
         ],
         dataBound:tableEvent
     });
+    $("#gridEquipos").kendoGrid(
+    {
+        dataSource: new kendo.data.DataSource(
+        {
+            pageSize: 20,
+            schema: {
+                model: {
+                    id: "id",
+                    fields: {
+                        id: { editable: false, nullable: true },
+                        codigo: { validation: { required: false } },
+                        categoria: {validation: { required: true } },
+                        tipoEquipo: {validation: { required: true } },
+                        marca: {validation: { required: true } },
+                        modelo: { validation: { required: false } },
+                        noSerie: { validation: { required: false } },
+                        descripcion: { validation: { required: false } }
+                    }
+                }
+            }
+        }),
+        pageable:
+        {
+            refresh: true,
+            pageSizes: true,
+            buttonCount: 5
+        },
+        height:300,
+        columns: [
+            { field: "codigo",title:'Codigo',width:100},
+            { field: "categoria",title:'Categoria',width:120},
+            { field: "tipoEquipo",title:'Tipo de Equipo',width:120},
+            { field: "marca",title:'Marca',width:120},
+            { field: "modelo",title:'Modelo',width:120},
+            { field: "noSerie",title:'No. Serie',width:120},
+            { field: "descripcion",title:'Descripcion'},
+            { command: [{name:'Eliminar',click:function(e){removeEquip(e)}}],title: "&nbsp;", width: 100 },
+        ]
+    });
 	useBoxMessage = true;
 	$("#btnCleanFields").click(cleanFieldsResguardo);
     $("#btnAddEquip").click(addEquipToGrid);
@@ -97,7 +136,6 @@ function complete()
     loadTable();
 	getPersonal();
 	getResguardos();
-	getCategoriesInventario();
 }
 function saveRecibo(e)
 {
@@ -407,63 +445,5 @@ function getPersonal()
 			updateError("Data: "+data+" Error:"+e);
 		}	
 	});
-}
-function getCategoriesInventario()
-{
-    $.post('facturas/getcatfortable',function(data)
-    {
-        try
-        {
-            var json = eval("("+data+")");
-            if(json.ok)
-            {
-                $("#gridEquipos").kendoGrid(
-                {
-                    dataSource: new kendo.data.DataSource(
-                    {
-                        pageSize: 20,
-                        schema: {
-                            model: {
-                                id: "id",
-                                fields: {
-                                    id: { editable: false, nullable: true },
-                                    codigo: { validation: { required: false } },
-                                    categoria: {type:"number", validation: { required: true } },
-                                    tipoEquipo: {type:"number", validation: { required: true } },
-                                    marca: {type:"number", validation: { required: true } },
-                                    modelo: { validation: { required: false } },
-                                    noSerie: { validation: { required: false } },
-                                    descripcion: { validation: { required: false } }
-                                }
-                            }
-                        }
-                    }),
-                    pageable:
-                    {
-                        refresh: true,
-                        pageSizes: true,
-                        buttonCount: 5
-                    },
-                    height:300,
-                    columns: [
-                        { field: "codigo",title:'Codigo',width:100},
-                        { field: "categoria",title:'Categoria',values:json.msg.categoria,width:120},
-                        { field: "tipoEquipo",title:'Tipo de Equipo',values:json.msg.tipoEquipo,width:120},
-                        { field: "marca",title:'Marca',values:json.msg.marca,width:120},
-                        { field: "modelo",title:'Modelo',width:120},
-                        { field: "noSerie",title:'No. Serie',width:120},
-                        { field: "descripcion",title:'Descripcion'},
-                        { command: [{name:'Eliminar',click:function(e){removeEquip(e)}}],title: "&nbsp;", width: 100 },
-                    ]
-                });
-            }
-            else
-                updateError("Ocurrio un error obteniendo la lista de las categorias de los equipos, por lo que no se crea la tabla de equipos");
-        }
-        catch (e)
-        {
-            updateError("Data: "+data+" Error:"+e);
-        }
-    });
 }
 $(document).ready(complete);
