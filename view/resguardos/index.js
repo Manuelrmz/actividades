@@ -1,5 +1,6 @@
 var equipList = null;
 var bandConsult = false;
+var currentId = null;
 function complete()
 {
 	var listaEquipos = [];
@@ -122,6 +123,7 @@ function complete()
     $("#formResguardo").submit(saveResguardo);
     $("#btnCleanFields").click(cleanFieldsResguardo);
     $("#btnAddEquip").click(addEquipToGrid);
+    $("#btnImprimir").click(actionOpenPdf);
     loadTable();
 	getPersonal();
 	getAllowedForResguardoCombo();
@@ -162,6 +164,7 @@ function saveResguardo(e)
 							cleanFieldsResguardo();
 							loadTable();
 							showSuccessBox(json.msg);
+                            openPdf(json.id);
 						}
 						else
 							updateError(json.msg)
@@ -208,8 +211,8 @@ function tableEvent()
                 var json = eval("("+data+")");
                 if(json.ok)
                 {
-                    cleanFieldsResguardo();
                     bandConsult = true;
+                    currentId = json.msg.id;
 					$("#nombre").val(json.msg.nombre);
 					$("#dependencia").val(json.msg.dependencia);
 					$("#departamento").val(json.msg.departamento);
@@ -219,6 +222,7 @@ function tableEvent()
 					$("#gridEquipos").data("kendoGrid").dataSource.data(json.msg.equipos);
 					$("#gridEquipos").data("kendoGrid").hideColumn(7);
 					$("#btnGuardar").hide();
+                    $("#btnImprimir").show();
 					$(".equipsFields").hide();
                 }
                 else
@@ -266,6 +270,7 @@ function addEquipToGrid()
 function cleanFieldsResguardo()
 {
 	bandConsult = false;
+    currentId =  null;
 	$("#nombre").val("");
 	$("#dependencia").val("");
 	$("#departamento").val("");
@@ -277,6 +282,7 @@ function cleanFieldsResguardo()
 	$("#gridEquipos").data("kendoGrid").showColumn(7);
 	$("#btnGuardar").show();
 	$(".equipsFields").show();
+    $("#btnImprimir").hide();
 	getAllowedForResguardoCombo();
 }
 function removeItemFromEquipList(value)
@@ -289,6 +295,17 @@ function removeItemFromEquipList(value)
             return false;
         }
     });
+}
+function actionOpenPdf()
+{
+    if(validarEntero(currentId,"Debe seleccionar un resguardo correcto"))
+    {
+        openPdf(currentId);
+    }
+}
+function openPdf(id)
+{
+    window.open(path+'resguardos/getpdf/'+id,'_blank');
 }
 function getPersonal()
 {

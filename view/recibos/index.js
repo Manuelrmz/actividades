@@ -133,6 +133,7 @@ function complete()
     $("#btnAddEquip").click(addEquipToGrid);
     $("#formRecibos").submit(saveRecibo);
     $("#btnFinish").click(finishRecibo);
+    $("#btnImprimir").click(actionOpenPdf);
     loadTable();
 	getPersonal();
 	getResguardos();
@@ -179,6 +180,7 @@ function saveRecibo(e)
 							cleanFieldsResguardo();
 							loadTable();
 							showSuccessBox(json.msg);
+							openPdf(json.id);
 						}
 						else
 							updateError(json.msg)
@@ -241,18 +243,14 @@ function tableEvent()
 					$("#btnGuardar").hide();
 					$(".equipsFields").hide();
 					$("#divEquipos").show();
+					currentId = json.msg.id;
 					if(json.msg.tipo == 0 && json.msg.status == 1)
-					{
 						$("#btnFinish").show();
-						currentId = json.msg.id;
-					}
 					else
-					{
 						$("#btnFinish").hide();
-						currentId = null;
-					}
 					$("#gridEquipos").data("kendoGrid").dataSource.data(json.msg.equipos);
 					$("#gridEquipos").data("kendoGrid").hideColumn(7);
+					$("#btnImprimir").show();
                 }
                 else
                     updateError(json.msg);
@@ -365,6 +363,7 @@ function cleanFieldsResguardo()
 	$("#divEquipos").hide();
 	$(".equipsFields").hide();
 	$("#btnFinish").hide();
+	$("#btnImprimir").hide();
 	$("#gridEquipos").data("kendoGrid").showColumn(7);
 }
 function removeEquip(e)
@@ -409,6 +408,17 @@ function removeItemFromEquipList(value)
             return false;
         }
     });
+}
+function actionOpenPdf()
+{
+    if(validarEntero(currentId,"Debe seleccionar un recibo correcto"))
+    {
+        openPdf(currentId);
+    }
+}
+function openPdf(id)
+{
+    window.open(path+'recibos/getpdf/'+id,'_blank');
 }
 function getResguardos()
 {

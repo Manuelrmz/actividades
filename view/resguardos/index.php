@@ -44,6 +44,7 @@
 		<div class="col-sm-12 text-center margin-form">
 			<button class="k-button" id="btnGuardar">Guardar</button>
 			<div style="margin-left:30px;" class="k-button" id="btnCleanFields">Limpiar Campos</div>
+			<div style="margin-left:30px; display:none;" class="k-button" id="btnImprimir">Imprimir</div>
 		</div>
 	</form>
 </div>

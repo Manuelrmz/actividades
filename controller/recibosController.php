@@ -58,6 +58,7 @@ class recibosController extends Controller
 					$this->_data["usuarioAlta"] = $_SESSION["userData"]["usuario"];
 					$this->_data["status"] = $this->_data["tipo"] == 1 ? 0 : 1 ;
 					$recibo = $q->table('recibos')->insert($this->_data);
+					$this->_data["id"] = $recibo;
 					if($this->_data["tipo"] == 1)
 						$q->table('resguardos')->where('id',$this->_data["idresguardo"])->update(array('status'=>0));
 					foreach ($equipList as $equip) {
@@ -70,6 +71,7 @@ class recibosController extends Controller
 				{
 					$this->_return["msg"] = "Recibo creado correctamente";
 					$this->_return["ok"] = true;
+					$this->_return["id"] = $this->_data["id"];
 				}
 				else
 					$this->_return["msg"] = "Ocurrio un error insertando el resguardo: ".$db->getError()["string"];
@@ -183,9 +185,9 @@ class recibosController extends Controller
 	{
 		Session::regenerateId();
 		Session::securitySession();
-		//include_once(CORE_PATH . 'mpdf/mpdf.php');
-		$pdfText = "<div style='height:100%; font-family: Arial,Helvetica Neue,Helvetica,sans-serif; font-size:11px;'>";
-		//$pdf = new mpdf('utf8','A4', '', '',1,1,12,13);
+		include_once(CORE_PATH . 'mpdf/mpdf.php');
+		$pdfText = '';
+		$pdf = new mpdf('utf8','A4', '', '',1,1,12,13);
 		if(isset($id))
 		{
 			$folio = (integer)$id;
@@ -214,72 +216,75 @@ class recibosController extends Controller
 					$recibo["encargadoArea"] = areas::select(array('representante'))->where('clave',$recibo['area'])->get()->fetch_assoc();
 					$recibo["coordinador"] = areas::select(array('representante'))->where('clave','Coordinacion')->get()->fetch_assoc();
 					//Iniciamos creacion del PDF
-					$pdfText .='<div style=" float:left;">
-									<div style="float:left; width:19%; height:120px; text-align:center;">
-										<img src="'.ROOT.'/images/c4.jpg" style="width:120px height:120px;"></img>
+					$pdfText .='<div style="height:100%; font-family: Arial,Helvetica Neue,Helvetica,sans-serif; font-size:11px;">
+									<div style=" float:left;">
+										<div style="float:left; width:19%; height:120px; text-align:center;">
+											<img src="'.ROOT.'/images/c4.jpg" style="width:120px height:120px;"></img>
+										</div>
+										<div style="float:left; width:60%; height:120px; text-align:center; border:solid 1px #fff;">
+											<h2 style="margin:20px 0px 0px 0px;">Centro de Control, Comando, Comunicaciones y Computo C4 Yucatan</h2>
+											<h3>RECIBO DE MOBILIARIO Y EQUIPO</h3>
+											<h3>'.$recibo["idunico"].'</h3>
+										</div>
+										<div style="float:left; width:19%; height:120px; text-align:center;">
+											<img src="'.ROOT.'/images/cesp.jpg" style="width:100px height:100px;"></img>
+										</div>
 									</div>
-									<div style="float:left; width:60%; height:120px; text-align:center; border:solid 1px #fff;">
-										<h2 style="margin:20px 0px 0px 0px;">Centro de Control, Comando, Comunicaciones y Computo C4 Yucatan</h2>
-										<h3 style="margin:20px 0px 0px 0px;">RECIBO DE MOBILIARIO Y EQUIPO</h3>
-										<h3 style="margin:20px 0px 0px 0px;">'.$recibo["idunico"].'</h3>
+									<hr>
+									<div style="float:left; width:92%; margin-left:7.5%; font-size:12px;">
+										<div style="float:left; width:70%;">
+											<div style="float:left; width:17%; padding:3px 0px; font-weight:bold;">Dependencia:</div>
+											<div style="float:left; width:82%; padding:3px 0px;">'.$recibo["dependencia"].'</div>
+										</div>
+										<div style="float:left; width:29%; border: solid 1px white;">
+											<div style="float:left; width:30%; padding:3px 0px; font-weight:bold;">Depto.</div>
+											<div style="float:left; width:69%; padding:3px 0px;">'.$recibo["departamento"].'</div>
+										</div>
+										<div style="float:left; width:100%; padding:3px 0px;">
+											<div style="float:left; width:18%; padding:3px 0px; font-weight:bold;">Jefe/Responsable:</div>
+											<div style="float:left; width:82%; padding:3px 0px;">'.$recibo["nombre"].'</div>
+										</div>
+										<div style="float:left; width:100%; padding:3px 0px;">
+											<div style="float:left; width:17%; padding:3px 0px; font-weight:bold;">Grado o Puesto:</div>
+											<div style="float:left; width:83%; padding:3px 0px;">'.$recibo["cargo"].'</div>
+										</div>
 									</div>
-									<div style="float:left; width:19%; height:120px; text-align:center;">
-										<img src="'.ROOT.'/images/cesp.jpg" style="width:100px height:100px;"></img>
-									</div>
-								</div>
-								<div style="float:left; width:92%; margin-left:7.5%; font-size:12px;">
-									<div style="float:left; width:85%;">
-										<div style="float:left; width:10%; padding:3px 0px; font-weight:bold;">Dependencia:</div>
-										<div style="float:left; width:89%; padding:3px 0px;">'.$recibo["dependencia"].'</div>
-									</div>
-									<div style="float:left; width:14%; padding:3px 0px;">
-										<div style="float:left; width:30%; padding:3px 0px; font-weight:bold;">Depto.</div>
-										<div style="float:left; width:70%; padding:3px 0px;">'.$recibo["departamento"].'</div>
-									</div>
-									<div style="float:left; width:100%; padding:3px 0px;">
-										<div style="float:left; width:30%; padding:3px 0px; font-weight:bold;">Jefe/Responsable:</div>
-										<div style="float:left; width:70%; padding:3px 0px;">'.$recibo["nombre"].'</div>
-									</div>
-									<div style="float:left; width:100%; padding:3px 0px;">
-										<div style="float:left; width:30%; padding:3px 0px; font-weight:bold;">Grado o Puesto:</div>
-										<div style="float:left; width:70%; padding:3px 0px;">'.$recibo["cargo"].'</div>
-									</div>
-								</div>';
+									<hr>';
 					if(sizeof($recibo["equipos"]) > 0)
 					{
-						$pdfText .= '<div>';
+						$pdfText .= '<div>
+										<div style="float:left; width:15%; padding:3px 0px; text-align:center; font-weight:bold;">Cantidad</div>
+										<div style="float:left; width:15%; padding:3px 0px; text-align:center; font-weight:bold;">Tipo de Equipo</div>
+										<div style="float:left; width:15%; padding:3px 0px; text-align:center; font-weight:bold;">Marca</div>
+										<div style="float:left; width:15%; padding:3px 0px; text-align:center; font-weight:bold;">Modelo</div>
+										<div style="float:left; width:24%; padding:3px 0px; text-align:center; font-weight:bold;">Serie</div>
+										<div style="float:left; width:15%; padding:3px 0px; text-align:center; font-weight:bold;">Observ.</div>';
 						for($i = 0; $i < sizeof($recibo["equipos"]);$i++)
 						{
-							$pdfText .='<div style="float:left; width:15%; padding:3px 0px; text-align:center;">'.					$recibo["equipos"][$i]["cantidad"].'</div>
-										<div style="float:left; width:15%; padding:3px 0px; text-align:center;">'.$recibo["equipos"][$i]["categoria"].'</div>
+							$pdfText .='<div style="float:left; width:15%; padding:3px 0px; text-align:center;">'.$recibo["equipos"][$i]["cantidad"].'</div>
+										<div style="float:left; width:15%; padding:3px 0px; text-align:center;">'.$recibo["equipos"][$i]["tipoEquipo"].'</div>
 										<div style="float:left; width:15%; padding:3px 0px; text-align:center;">'.$recibo["equipos"][$i]["marca"].'</div>
 										<div style="float:left; width:15%; padding:3px 0px; text-align:center;">'.($recibo["equipos"][$i]["modelo"] != "" ? $recibo["equipos"][$i]["modelo"] : "&nbsp;" ).'</div>
-										<div style="float:left; width:25%; padding:3px 0px; text-align:center;">'.$recibo["equipos"][$i]["noSerie"].'</div>
-										<div style="float:left; width:15%; padding:3px 0px; text-align:center;">'.($recibo["equipos"][$i]["codigo"] != "" ? $recibo["equipos"][$i]["codigo"] : "&nbsp;" ).'</div>
+										<div style="float:left; width:24%; padding:3px 0px; text-align:center;">'.$recibo["equipos"][$i]["noSerie"].'</div>
+										<div style="float:left; width:15%; padding:3px 0px; text-align:center;">'.$recibo["equipos"][$i]["descripcion"].'</div>
 								';
 						}
 						$pdfText .= '</div>';
 					}
-					$pdfText .= '<div style="float:left; width:100%; padding:3px 0px;">
-									'.$recibo["nota"].'
-								</div>
-								<div style="float:left; width:33%; padding:3px 0px; text-align:center;">
-									<div>Coordinador General del C4 Yucatan</div>
-									</br></br>
-									<div>___________________________________</div>
-									<div>'.$recibo["coordinador"]["representante"].'</div>
-								</div>
-								<div style="float:left; width:33%; padding:3px 0px; text-align:center;">
-									<div>Coordinador del area de '.$recibo["area"].'</div>
-									</br></br>
-									<div>___________________________________</div>
-									<div>'.$recibo["encargadoArea"]["representante"].'</div>
-								</div>
-								<div style="float:left; width:33%; padding:3px 0px; text-align:center;">
-									<div>Entregue</div>
-									</br></br>
-									<div>___________________________________</div>
-									<div>'.$recibo["nombre"].'</div>
+					$pdfText .='<div style="float:left; width:100%; padding:3px 0px; margin-top:25px;">'.$recibo["nota"].'</div></div>
+								<div style="position:absolute; bottom:1.5cm; width:100%; font-family: Arial,Helvetica Neue,Helvetica,sans-serif; font-size:11px;">
+									<div style="float:left; width:50%; padding:3px 0px; text-align:center;">
+										<div>Coordinador del area de '.$recibo["area"].'</div>
+										</br></br>
+										<div style="margin-top:40px;">___________________________________</div>
+										<div>'.$recibo["encargadoArea"]["representante"].'</div>
+									</div>
+									<div style="float:left; width:50%; padding:3px 0px; text-align:center;">
+										<div>Entregue de Conformidad</div>
+										</br></br>
+										<div style="margin-top:40px;">___________________________________</div>
+										<div>'.$recibo["nombre"].'</div>
+									</div>
 								</div>';
 				}
         		else
@@ -290,11 +295,9 @@ class recibosController extends Controller
 		}
 		else
 			$pdfText .= "Parametro no recibido correctamente";
-		$pdfText .= '</div>';
-		echo $pdfText;
 		//echo $pdfText;
-		//$pdf -> WriteHTML($pdfText);
-		//$pdf -> Output("boletaFiscalia.pdf","I");
+		$pdf -> WriteHTML($pdfText);
+		$pdf -> Output("recibo.pdf","I");
 	}
 	public function resguardo($data)
 	{
