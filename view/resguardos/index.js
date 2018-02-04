@@ -1,6 +1,8 @@
 var equipList = null;
 var bandConsult = false;
 var currentId = null;
+var denySaveFile = false;
+var filename = null;
 function complete()
 {
 	var listaEquipos = [];
@@ -124,6 +126,7 @@ function complete()
     $("#btnCleanFields").click(cleanFieldsResguardo);
     $("#btnAddEquip").click(addEquipToGrid);
     $("#btnImprimir").click(actionOpenPdf);
+    $("#btnPdfSigned").click(actionOpenPdfSigned);
     loadTable();
 	getPersonal();
 	getAllowedForResguardoCombo();
@@ -131,56 +134,64 @@ function complete()
 function saveResguardo(e)
 {
 	e.preventDefault();
-	if(!bandConsult)
-	{
-		var condi = true;
-		condi = condi && validarTamanio($("#nombre").val(),"Nombre Solicitante",1,200);
-		condi = condi && validarTamanio($("#dependencia").val(),"Dependencia Solicitante",1,150);
-		condi = condi && validarComboBox($("#personal option:selected"),undefined,"Seleccione el personal que entrega los equipos");
-		if($("#gridEquipos").data("kendoGrid").dataSource.data().length == 0)
-		{
-			condi = false;
-			updateError("Debe seleccionar al menos un equipo para asignar al resguardo");
-		}
-		if(condi)
-		{
-			var dataSend = new FormData(this);
-			dataSend.append("equipos",JSON.stringify($("#gridEquipos").data("kendoGrid").dataSource.data()));
-			dataSend.append("personal",$("#personal").data("kendoComboBox").value());
-			$.ajax(
-			{
-				url:path+'resguardos/new',
-				type:"POST",
-				data:dataSend,
-				processData:false,
-				contentType:false,
-				success: function(data)
-				{
-					try
-					{
-						var json = eval("("+data+")");
-						if(json.ok)
-						{
-							cleanFieldsResguardo();
-							loadTable();
-							showSuccessBox(json.msg);
-                            openPdf(json.id);
-						}
-						else
-							updateError(json.msg)
-					}
-					catch(err)
-					{
-						updateError("Error: "+err+ " Data: "+data);
-					}
-				},
-				error: function(data)
-				{
-					updateError('Error: '+data);
-				}
-			});
-		}
-	}
+    if(!denySaveFile)
+    {
+    	var condi = true;
+    	condi = condi && validarTamanio($("#nombre").val(),"Nombre Solicitante",1,200);
+    	condi = condi && validarTamanio($("#dependencia").val(),"Dependencia Solicitante",1,150);
+    	condi = condi && validarComboBox($("#personal option:selected"),undefined,"Seleccione el personal que entrega los equipos");
+    	if($("#gridEquipos").data("kendoGrid").dataSource.data().length == 0)
+    	{
+    		condi = false;
+    		updateError("Debe seleccionar al menos un equipo para asignar al resguardo");
+    	}
+    	if(condi)
+    	{
+    		var dataSend = new FormData(this);
+            if(bandConsult)
+            {
+                dataSend.append("id",currentId);
+            }
+    		else
+            {
+                dataSend.append("equipos",JSON.stringify($("#gridEquipos").data("kendoGrid").dataSource.data()));
+                dataSend.append("personal",$("#personal").data("kendoComboBox").value());
+            }
+    		$.ajax(
+    		{
+    			url:path+(bandConsult ?  "resguardos/savepdf" : 'resguardos/new'),
+    			type:"POST",
+    			data:dataSend,
+    			processData:false,
+    			contentType:false,
+    			success: function(data)
+    			{
+    				try
+    				{
+    					var json = eval("("+data+")");
+    					if(json.ok)
+    					{
+                            if(!bandConsult)
+                                openPdf(path+'resguardos/getpdf/'+json.id);
+    						cleanFieldsResguardo();
+    						loadTable();
+    						showSuccessBox(json.msg);
+    					}
+    					else
+    						updateError(json.msg)
+    				}
+    				catch(err)
+    				{
+    					updateError("Error: "+err+ " Data: "+data);
+    				}
+    			},
+    			error: function(data)
+    			{
+    				updateError('Error: '+data);
+    			}
+    		});
+    	}
+    }
 }
 function loadTable()
 {
@@ -221,9 +232,27 @@ function tableEvent()
 					$("#personal").data("kendoComboBox").value(json.msg.personal);
 					$("#gridEquipos").data("kendoGrid").dataSource.data(json.msg.equipos);
 					$("#gridEquipos").data("kendoGrid").hideColumn(7);
-					$("#btnGuardar").hide();
                     $("#btnImprimir").show();
 					$(".equipsFields").hide();
+                    $("#divFile").hide();
+                    $("#file").val("");
+                    $("#btnGuardar").hide();
+                    $("#btnPdfSigned").hide();
+                    if(json.msg.file)
+                    {
+                        filename = json.msg.file.filename
+                        denySaveFile = true;
+                        $("#btnPdfSigned").show();
+                        $("#btnGuardar").hide();
+                    }
+                    else
+                    {
+                        $("#divFile").show();
+                        $("#btnGuardar").show();
+                        $("#btnPdfSigned").hide();
+                        denySaveFile = false;
+                    }
+
                 }
                 else
                     updateError(json.msg);
@@ -270,7 +299,9 @@ function addEquipToGrid()
 function cleanFieldsResguardo()
 {
 	bandConsult = false;
+    denySaveFile = false;
     currentId =  null;
+    filename = null;
 	$("#nombre").val("");
 	$("#dependencia").val("");
 	$("#departamento").val("");
@@ -280,9 +311,12 @@ function cleanFieldsResguardo()
 	$("#equipos").data("kendoComboBox").value("");
 	$("#gridEquipos").data("kendoGrid").dataSource.data([]);
 	$("#gridEquipos").data("kendoGrid").showColumn(7);
-	$("#btnGuardar").show();
 	$(".equipsFields").show();
     $("#btnImprimir").hide();
+    $("#divFile").hide();
+    $("#file").val("");
+    $("#btnGuardar").show();
+    $("#btnPdfSigned").show().hide();
 	getAllowedForResguardoCombo();
 }
 function removeItemFromEquipList(value)
@@ -300,12 +334,19 @@ function actionOpenPdf()
 {
     if(validarEntero(currentId,"Debe seleccionar un resguardo correcto"))
     {
-        openPdf(currentId);
+        openPdf(path+'resguardos/getpdf/'+currentId);
     }
 }
-function openPdf(id)
+function actionOpenPdfSigned()
 {
-    window.open(path+'resguardos/getpdf/'+id,'_blank');
+    if(filename)
+    {
+        openPdf(path+'private/resguardos/'+filename);
+    }
+}
+function openPdf(url)
+{
+    window.open(url,'_blank');
 }
 function getPersonal()
 {

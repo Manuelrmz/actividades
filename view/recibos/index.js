@@ -1,6 +1,8 @@
 var equipList = null;
 var bandConsult = false;
 var currentId = null;
+var denySaveFile = false;
+var filename = null;
 function complete()
 {
 	$("#resguardo").kendoComboBox({placeholder:"Seleccione el resguardo",dataTextField:"text",dataValueField:"value",change:restartEquipDiv});
@@ -134,6 +136,7 @@ function complete()
     $("#formRecibos").submit(saveRecibo);
     $("#btnFinish").click(finishRecibo);
     $("#btnImprimir").click(actionOpenPdf);
+    $("#btnPdfSigned").click(actionOpenPdfSigned);
     loadTable();
 	getPersonal();
 	getResguardos();
@@ -141,7 +144,7 @@ function complete()
 function saveRecibo(e)
 {
 	e.preventDefault();
-	if(!bandConsult)
+	if(!denySaveFile)
 	{
 		var condi = true;
 		condi = condi && validarComboBox($("#resguardo option:selected"),undefined,"Seleccione un resguardo");
@@ -158,14 +161,19 @@ function saveRecibo(e)
 		if(condi)
 		{
 			var dataSend = new FormData(this);
-			dataSend.append("idresguardo",$("#resguardo").data("kendoComboBox").value());
-			dataSend.append("equipos",JSON.stringify($("#gridEquipos").data("kendoGrid").dataSource.data()));
-			dataSend.append("personal",$("#personal").data("kendoComboBox").value());
-			dataSend.append("tipo",$("#tipo").data("kendoComboBox").value());
-			dataSend.append("status",($("#tipo").data("kendoComboBox").value() == 1 ? 0 : 1));
+			if(bandConsult)
+				dataSend.append('id',currentId);
+			else
+			{
+				dataSend.append("idresguardo",$("#resguardo").data("kendoComboBox").value());
+				dataSend.append("equipos",JSON.stringify($("#gridEquipos").data("kendoGrid").dataSource.data()));
+				dataSend.append("personal",$("#personal").data("kendoComboBox").value());
+				dataSend.append("tipo",$("#tipo").data("kendoComboBox").value());
+				dataSend.append("status",($("#tipo").data("kendoComboBox").value() == 1 ? 0 : 1));
+			}
 			$.ajax(
 			{
-				url:path+'recibos/new',
+				url:path+( bandConsult ? 'recibos/savepdf' : 'recibos/new'),
 				type:"POST",
 				data:dataSend,
 				processData:false,
@@ -177,10 +185,11 @@ function saveRecibo(e)
 						var json = eval("("+data+")");
 						if(json.ok)
 						{
+							if(!bandConsult)
+								openPdf(path+'recibos/getpdf/'+json.id);
 							cleanFieldsResguardo();
 							loadTable();
 							showSuccessBox(json.msg);
-							openPdf(json.id);
 						}
 						else
 							updateError(json.msg)
@@ -240,7 +249,6 @@ function tableEvent()
 					$("#departamento").val(json.msg.departamento);
 					$("#cargo").val(json.msg.cargo);
 					$("#nota").val(json.msg.nota);
-					$("#btnGuardar").hide();
 					$(".equipsFields").hide();
 					$("#divEquipos").show();
 					currentId = json.msg.id;
@@ -251,6 +259,24 @@ function tableEvent()
 					$("#gridEquipos").data("kendoGrid").dataSource.data(json.msg.equipos);
 					$("#gridEquipos").data("kendoGrid").hideColumn(7);
 					$("#btnImprimir").show();
+					$("#divFile").hide();
+                    $("#file").val("");
+                    $("#btnGuardar").hide();
+                    $("#btnPdfSigned").hide();
+					if(json.msg.file)
+                    {
+                        filename = json.msg.file.filename
+                        denySaveFile = true;
+                        $("#btnPdfSigned").show();
+                        $("#btnGuardar").hide();
+                    }
+                    else
+                    {
+                        $("#divFile").show();
+                        $("#btnGuardar").show();
+                        $("#btnPdfSigned").hide();
+                        denySaveFile = false;
+                    }
                 }
                 else
                     updateError(json.msg);
@@ -345,6 +371,8 @@ function cleanFieldsResguardo()
 {
 	bandConsult = false;
 	currentId = null;
+	filename = null;
+	denySaveFile = false;
 	$("#resguardo").data("kendoComboBox").value("");
 	$("#resguardo").data("kendoComboBox").enable(true);
 	$("#personal").data("kendoComboBox").value("");
@@ -365,6 +393,10 @@ function cleanFieldsResguardo()
 	$("#btnFinish").hide();
 	$("#btnImprimir").hide();
 	$("#gridEquipos").data("kendoGrid").showColumn(7);
+	$("#divFile").hide();
+    $("#file").val("");
+    $("#btnGuardar").show();
+    $("#btnPdfSigned").show().hide();
 }
 function removeEquip(e)
 {
@@ -413,12 +445,19 @@ function actionOpenPdf()
 {
     if(validarEntero(currentId,"Debe seleccionar un recibo correcto"))
     {
-        openPdf(currentId);
+        openPdf(path+'recibos/getpdf/'+currentId);
     }
 }
-function openPdf(id)
+function openPdf(url)
 {
-    window.open(path+'recibos/getpdf/'+id,'_blank');
+    window.open(url,'_blank');
+}
+function actionOpenPdfSigned()
+{
+    if(filename)
+    {
+        openPdf(path+'private/recibos/'+filename);
+    }
 }
 function getResguardos()
 {

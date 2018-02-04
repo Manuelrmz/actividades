@@ -176,6 +176,7 @@ $this->post('resguardos/getopencombo','getOpenForComboBox');
 $this->post('resguardos/getequipfortablebyid','getEquipForTableById');
 $this->post('resguardos/getequipforcomboactivebyid','getEquipForComboActiveById');
 $this->get('resguardos/getpdf','getPdf');
+$this->post('resguardos/savepdf','saveResguardoSigned');
 /*Modulo Recibos*/
 $this->get('recibos');
 $this->post('recibos/new');
@@ -183,6 +184,7 @@ $this->post('recibos/getfortablebyuserarea','getForTableByUserArea');
 $this->post('recibos/getbyid','getById');
 $this->post('recibos/closetemporal','closeReciboTemporalById');
 $this->get('recibos/getpdf','getPdf');
+$this->post('recibos/savepdf','saveReciboSigned');
 /*Modulos Manejo de Errores*/
 $this->get('error');
 $this->get('error/error403');

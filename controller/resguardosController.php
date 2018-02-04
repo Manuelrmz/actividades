@@ -74,6 +74,9 @@ class resguardosController extends Controller
 				$resguardo["equipos"] = inventario::select(array('inventario.id','codigo','categoria','tipoEquipo','marca','modelo','noSerie','descripcion'))
 										->join(array('resguardosInventario','ri'),'inventario.id','=','ri.idinventario','LEFT')
 										->where('ri.idresguardo',$id)->get()->fetch_all();
+				$resguardo["file"] = archivos::select(array('archivos.filename'))->join(array('archivosResguardo','ar'),'archivos.id','=','ar.idarchivo','LEFT')
+										->where('ar.idresguardo',$id)
+										->get()->fetch_assoc();
 				$this->_return["msg"] = $resguardo;
 				$this->_return["ok"] = true;
 			}
@@ -275,6 +278,86 @@ class resguardosController extends Controller
 		//echo $pdfText;
 		$pdf -> WriteHTML($pdfText);
 		$pdf -> Output("resguardo.pdf","I");
+	}
+	public function saveResguardoSigned()
+	{
+		Session::regenerateId();
+		Session::securitySession();
+		$db = new queryBuilder();
+		$this->resguardo($_POST);
+		$condi = true;
+		$condi = $condi && $this->_validar->Int($this->_data["id"],"Folio");
+		$condi = $condi && $this->_validar->MinInt($this->_data["id"],1,"Debe enviar un folio valido");
+		if($condi)
+		{
+			$resguardo = resguardos::select(array('id'))->where('id',$this->_data["id"])->where('area',$_SESSION["userData"]["area"])->get()->fetch_assoc();
+			if($resguardo)
+			{
+				if(isset($_FILES) && sizeof($_FILES) > 0)
+                {
+                    $fields = array_keys($_FILES);
+                    foreach ($fields as $field)
+                	{
+                        if($_FILES[$field]["tmp_name"] != "")
+                        {
+                            $this->_data["archivo"] = preg_replace(array('/á/','/é/','/í/','/ó/','/ú/','/Á/','/É/','/Í/','/Ó/','/Ú/'),array('a','e','i','o','u','A','E','I','O','U'),$_FILES[$field]["name"]);
+                            $extension = explode(".",$this->_data["archivo"]);
+                            $extension = $extension[count($extension)-1];
+                            $archivo = archivos::select(array('archivos.name','archivos.size'))->join(array('archivosResguardo','ar'),'archivos.id','=','ar.idarchivo','LEFT')->where('ar.idresguardo',$this->_data["id"])->get()->fetch_assoc();
+                            if(!$archivo || ($archivo && ($archivo["name"] !== $_FILES[$field]["name"] || $archivo["size"] != $_FILES[$field]["size"])))
+                            {
+                                $this->_data["requireUpdate"] = $archivo ? true : false;
+	                            if($_FILES[$field]["type"] === "application/pdf")
+	                            {
+	                                $this->_data["filename"] = tempnam(ROOT . 'private/resguardos/','');
+	                                unlink($this->_data["filename"]);
+	                                $this->_data["filename"] = explode('/',$this->_data["filename"]);
+	                                $this->_data["filename"] = $this->_data["filename"][count($this->_data["filename"])-1].'.'.$extension;
+	                                if(move_uploaded_file($_FILES[$field]['tmp_name'], ROOT . 'private/resguardos/'.$this->_data["filename"]))
+	                                {
+	                                    $this->_data["filetype"] = $_FILES[$field]['type'];
+	                                    $this->_data["filesize"] = $_FILES[$field]['size'];
+	                                    $transaccion = $db->transaction(function($q)
+	                                    {
+	                                        $imagen = $q->table('archivos')->insert(array('filename'=>$this->_data["filename"],'name'=>$this->_data["archivo"],'type'=>$this->_data["filetype"],'size'=>$this->_data["filesize"],'usuarioAlta'=>$_SESSION["userData"]["usuario"],'fechaAlta'=>date('Y-m-d H:i:s')));
+	                                        if($this->_data["requireUpdate"])
+                                            	$q->table('archivosResguardo')->where('idresguardo',$this->_data["id"])->update(array('idarchivo'=>$imagen));
+                                        	else
+	                                        	$q->table('archivosResguardo')->insert(array('idarchivo'=>$imagen,'idresguardo'=>$this->_data["id"]));
+	                                    });
+	                                    if($transaccion)
+	                                	{
+											$this->_return["msg"] = $this->_data["archivo"]." guardado correctamente";
+											$this->_return["ok"] = true;
+	                                    }
+	                                    else
+	                                    {
+	                                        $this->_return["msg"] = "No fue posible guardar ".$this->_data["archivo"]." Error : ".$db->getError()["string"];
+	                                        unlink(ROOT . 'private/resguardos/'.$this->_data["filename"]);
+	                                    }
+	                                }
+	                                else
+	                                    $this->_return["msg"] = "No fue posible guardar ".$this->_data["archivo"];
+	                            }
+	                            else
+	                                $this->_return["msg"] = "El archivo ".$this->_data["archivo"]." no viene con un formato correcto.";
+	                        }
+	                        else
+	                        	$this->_return["msg"] = "Este resguardo ya cuenta con su PDF firmado.";
+                        }
+                        else
+                        	$this->_return["msg"] = "No se recibio un archivo para guardar";
+                    }
+                }
+                else
+                	$this->_return["msg"] = "No se recibio un archivo para guardar";
+			}
+			else
+				$this->_return["msg"] = "No se encontro un resguardo con el folio enviado";
+		}
+		else
+			$this->_return["msg"] = $this->_validar->getWarnings();
+		echo json_encode($this->_return);
 	}
 	public function resguardo($data)
 	{
