@@ -150,6 +150,8 @@ $this->post('inventario/update');
 $this->post('inventario/getbyid');
 $this->post('inventario/getfortable','getForTable');
 $this->post('inventario/getallowedforresguardocombo','getAllowedForResguardoCombo');
+$this->post('inventario/getresguardo','getResguardoEquipo');
+$this->post('inventario/getfactura','getFacturaEquipo');
 /*Catalogo Tipos de Equipo Inventario*/
 $this->post('catteinventario/getfortable','getForTable');
 $this->post('catteinventario/update');

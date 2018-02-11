@@ -14,6 +14,8 @@ function complete()
 	$("#marca").data("kendoComboBox").value("");
 	$("#um").kendoComboBox({placeholder:"Seleccione la unidad de medida",dataValueField:"value",dataTextField:"text"});
 	$("#um").data("kendoComboBox").value("");
+	$("#area").kendoComboBox({placeholder:"Seleccione el area",dataValueField:"value",dataTextField:"text"});
+	$("#area").data("kendoComboBox").value("");
 	$("#gridInventario").kendoGrid(
   	{
 		dataSource: new kendo.data.DataSource(
@@ -63,9 +65,12 @@ function complete()
 	getUMInventario();
 	loadTable();
 	getFacturas();
+	getAreas();
 	getStatusInventario();
 	$("#formInventario").submit(saveInventario);
 	$("#clearFieldsInventario").click(cleanFieldsInventario);
+	$("#btnFacturaDetail").click(loadDataFactura);
+	$("#btnResguardoDetail").click(loadDataResguardo);	
 	useBoxMessage = true;
 }
 function saveInventario(e)
@@ -74,6 +79,7 @@ function saveInventario(e)
 	var condi = true;
 	condi = condi && validarEntero($("#cantidad").val(),"El campo cantidad debe ser numerico");
 	condi = condi && validarMinInt($("#cantidad").val(),1,"cantidad");
+	condi = condi && validarComboBox($("#area option:selected"),undefined,"Seleccione un area correcta");
 	condi = condi && validarComboBox($("#categoria option:selected"),undefined,"Seleccione una categoria");
 	condi = condi && validarComboBox($("#tipoEquipo option:selected"),undefined,"Seleccione un tipo de equipo");
 	condi = condi && validarComboBox($("#marca option:selected"),undefined,"Seleccione una marca");
@@ -87,6 +93,7 @@ function saveInventario(e)
 	{	
 		var dataSend = new FormData(this);
 		dataSend.set('idfactura',$("#noFactura").data("kendoComboBox").value());
+		dataSend.set('area',$("#area").data("kendoComboBox").value());
 		dataSend.set('categoria',$("#categoria").data("kendoComboBox").text());
 		dataSend.set('tipoEquipo',$("#tipoEquipo").data("kendoComboBox").text());
 		dataSend.set('marca',$("#marca").data("kendoComboBox").text());
@@ -132,6 +139,7 @@ function cleanFieldsInventario()
 	bandModificar = false;
 	$("#titleForm").html("Nuevo Equipo");
 	$("#noFactura").data("kendoComboBox").value("");
+	$("#area").data("kendoComboBox").value("");
 	$("#status").data("kendoComboBox").value("");
 	$("#cantidad").val("");
 	$("#categoria").data("kendoComboBox").value("");
@@ -142,6 +150,116 @@ function cleanFieldsInventario()
 	$("#modelo").val("");
 	$("#noSerie").val("");
 	$("#descripcion").val("");
+	$("#btnFacturaDetail").hide();
+	$("#btnResguardoDetail").hide();
+}
+function loadDataFactura()
+{
+	if(currentId)
+	{
+		$.post(path+'inventario/getfactura/'+currentId,function(data)
+		{
+			console.log(data);
+			try
+			{
+				var json = eval("("+data+")");
+				if(json.ok)
+				{
+					$("#divFactura").show();
+					$("#nombreEmpresa").html((json.msg.nombreEmpresa != "" ? json.msg.nombreEmpresa : "&nbsp;"));
+					$("#rfcEmpresa").html((json.msg.rfc != "" ? json.msg.rfc : "&nbsp;"));
+					$("#direccionEmpresa").html((json.msg.direccion != "" ? json.msg.direccion : "&nbsp;"));
+					$("#cpEmpresa").html((json.msg.cp != "" ? json.msg.cp : "&nbsp;"));
+					$("#noFacturaEmpresa").html((json.msg.noFactura != "" ? json.msg.noFactura : "&nbsp;"));
+					$("#fechaFactura").html((json.msg.fecha != "" ? json.msg.fecha : "&nbsp;"));
+					$("#fechaEntregaFactura").html((json.msg.fechaEntrega != "" ? json.msg.fechaEntrega : "&nbsp;"));
+					$("#areaFactura").html((json.msg.area != "" ? json.msg.area : "&nbsp;"));
+					openModalDetails();
+				}
+				else
+					updateError(json.msg);
+			}
+			catch(err)
+			{
+				updateError("Error: "+err+" Data: "+data);
+			}
+		});
+	}
+}
+function loadDataResguardo()
+{
+	if(currentId)
+	{
+		$.post(path+'inventario/getresguardo/'+currentId,function(data)
+		{
+			console.log(data);
+			try
+			{
+				var json = eval("("+data+")");
+				if(json.ok)
+				{
+					$("#divResguardo").show();
+					$("#folioResguardo").html((json.msg.idunico != "" ? json.msg.idunico : "&nbsp;"));
+					$("#areaResguardo").html((json.msg.area != "" ? json.msg.area : "&nbsp;"));
+					$("#nombreSolicitante").html((json.msg.nombre != "" ? json.msg.nombre : "&nbsp;"));
+					$("#cargoSolicitante").html((json.msg.cargo != "" ? json.msg.cargo : "&nbsp;"));
+					$("#dependenciaSolicitante").html((json.msg.dependencia != "" ? json.msg.dependencia : "&nbsp;"));
+					$("#departamentoSolicitante").html((json.msg.departamento != "" ? json.msg.departamento : "&nbsp;"));
+					$("#personalResguardo").html((json.msg.personal != "" ? json.msg.personal : "&nbsp;"));
+					openModalDetails();
+				}
+				else
+					updateError(json.msg);
+			}
+			catch(err)
+			{
+				updateError("Error: "+err+" Data: "+data);
+			}
+		});
+	}
+}
+function openModalDetails()
+{
+	if($("#modalDetails").data('kendoWindow')!=undefined)
+	{
+		$("#modalDetails").data('kendoWindow').open();
+		$("#modalDetails").data('kendoWindow').center();
+	}
+	else
+	{
+		$("#modalDetails").show();
+		$("#modalDetails").kendoWindow(
+		{
+			actions: ["Maximize", "Minimize", "Close"],
+			draggable: true,
+			height: "auto",
+			width:"600px",
+			modal: true,
+			resizable: false,
+			close:clearAllFieldsDetails
+		});
+		$("#modalDetails").data('kendoWindow').center();
+	}
+}
+function clearAllFieldsDetails()
+{
+	$("#divFactura").hide();
+	$("#nombreEmpresa").html("");
+	$("#rfcEmpresa").html("");
+	$("#direccionEmpresa").html("");
+	$("#cpEmpresa").html("");
+	$("#noFacturaEmpresa").html("");
+	$("#fechaFactura").html("");
+	$("#fechaEntregaFactura").html("");
+	$("#areaFactura").html("");
+	$("#divResguardo").hide();
+	$("#folioResguardo").html("");
+	$("#areaResguardo").html("");
+	$("#nombreSolicitante").html("");
+	$("#cargoSolicitante").html("");
+	$("#dependenciaSolicitante").html("");
+	$("#departamentoSolicitante").html("");
+	$("#personalResguardo").html("");
 }
 function loadTable()
 {
@@ -178,6 +296,7 @@ function eventTable()
 					bandModificar = true;
 					$("#noFactura").data("kendoComboBox").value(json.msg.idfactura ? json.msg.idfactura : "");
 					$("#status").data("kendoComboBox").value(json.msg.status);
+					$("#area").data("kendoComboBox").value(json.msg.area);
 					$("#cantidad").val(json.msg.cantidad);
 					$("#categoria").data("kendoComboBox").value(json.msg.categoria);
 					$("#tipoEquipo").data("kendoComboBox").value(json.msg.tipoEquipo);
@@ -187,6 +306,9 @@ function eventTable()
 					$("#modelo").val(json.msg.modelo);
 					$("#noSerie").val(json.msg.noSerie);
 					$("#descripcion").val(json.msg.descripcion);
+					if(json.msg.idfactura)
+						$("#btnFacturaDetail").show();
+					$("#btnResguardoDetail").show();
                 }
                 else
                     updateError(json.msg);
@@ -299,5 +421,19 @@ function getStatusInventario()
 		  updateError("Data: "+data+" Error:"+e);
 		}
 	});
+}
+function getAreas()
+{
+    $.post(path+'areas/operativas',function(data)
+    {
+        try
+        {
+            $("#area").data("kendoComboBox").setDataSource(eval("("+data+")"));
+        }
+        catch (e)
+        {
+            updateError("Data: "+data+" Error:"+e);
+        }
+    });
 }
 $(document).ready(complete);

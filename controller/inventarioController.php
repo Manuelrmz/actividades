@@ -22,6 +22,8 @@ class inventarioController extends Controller
 		$this->inventario($_POST);
 		$condi = true;
 		$condi = $condi && $this->_validar->Int($this->_data["cantidad"],"Cantidad");
+		$condi = $condi && $this->_validar->Int($this->_data["area"],"Area");
+		$condi = $condi && $this->_validar->MinMaxInt($this->_data["area"],1,20,"Area");
 		$condi = $condi && $this->_validar->MinInt($this->_data["cantidad"],"1","Debes seleccionar un valor valido del campo Cantidad");
 		$condi = $condi && $this->_validar->MinMax($this->_data["categoria"],1,100,"Categoria");
 		$condi = $condi && $this->_validar->MinMax($this->_data["tipoEquipo"],1,100,"Tipo de Equipo");
@@ -64,6 +66,8 @@ class inventarioController extends Controller
 		$condi = $condi && $this->_validar->Int($this->_data["id"],"Folio");
 		$condi = $condi && $this->_validar->MinInt($this->_data["id"],"1","Debes enviar un equipo con Folio Valido");
 		$condi = $condi && $this->_validar->Int($this->_data["cantidad"],"Cantidad");
+		$condi = $condi && $this->_validar->Int($this->_data["area"],"Area");
+		$condi = $condi && $this->_validar->MinMaxInt($this->_data["area"],1,20,"Area");
 		$condi = $condi && $this->_validar->MinInt($this->_data["cantidad"],"1","Debes seleccionar un valor valido del campo Cantidad");
 		$condi = $condi && $this->_validar->MinMax($this->_data["categoria"],1,100,"Categoria");
 		$condi = $condi && $this->_validar->MinMax($this->_data["tipoEquipo"],1,100,"Tipo de Equipo");
@@ -125,6 +129,53 @@ class inventarioController extends Controller
 			$this->_return["msg"] = $this->_validar->getWarnings();
 		echo json_encode($this->_return);
 	}
+	public function getResguardoEquipo($id)
+	{
+		Session::regenerateId();
+    	Session::securitySession();
+		$this->inventario($_POST);
+		$condi = true;
+		$condi = $condi && $this->_validar->Int($id,"Folio");
+		$condi = $condi && $this->_validar->MinInt($id,"1","Debes enviar un equipo con Folio Valido");
+		if($condi)
+		{
+			$resguardo = inventario::select(array('CONCAT("C4-RES/",r.idunico,"/",r.anio)'=>'idunico','r.nombre','r.dependencia','r.departamento','r.cargo','r.area','CONCAT(u.nombres," ",u.apellidos)'=>'personal'))->join(array('resguardosInventario','ri'),'inventario.id','=','ri.idinventario','LEFT')->join(array('resguardos','r'),'ri.idresguardo','=','r.id','LEFT')->join(array('usuarios','u'),'r.personal','=','u.id','LEFT')->where('r.status',1)->where('inventario.id',$id)->get()->fetch_assoc();
+			if($resguardo)
+			{
+				$this->_return["msg"] = $resguardo;
+				$this->_return["ok"] = true;
+			}
+			else
+				$this->_return["msg"] = "No se encontro ningun resguardo para el equipo seleccionado";
+		}
+		else
+			$this->_return["msg"] = $this->_validar->getWarnings();
+		echo json_encode($this->_return);
+	}
+	public function getFacturaEquipo($id)
+	{
+		Session::regenerateId();
+    	Session::securitySession();
+		$this->validatePermissions('inventario');
+		$this->inventario($_POST);
+		$condi = true;
+		$condi = $condi && $this->_validar->Int($id,"Folio");
+		$condi = $condi && $this->_validar->MinInt($id,"1","Debes enviar un equipo con Folio Valido");
+		if($condi)
+		{
+			$factura = inventario::select(array('f.fecha','f.noFactura','f.vendedor','f.comprador','f.fechaEntrega','f.responsable','a.nombre'=>'area','p.rfc','p.nombreEmpresa','p.direccion','p.cp'))->join(array('facturas','f'),'inventario.idfactura','=','f.id','LEFT')->join(array('proveedores','p'),'f.rfc','=','p.id','LEFT')->join(array('areas','a'),'f.area','=','a.id','LEFT')->whereNotNull('f.id')->where('inventario.id',$id)->get()->fetch_assoc();
+			if($factura)
+			{
+				$this->_return["msg"] = $factura;
+				$this->_return["ok"] = true;
+			}
+			else
+				$this->_return["msg"] = "No se encontro la factura del equipo enviado";
+		}
+		else
+			$this->_return["msg"] = $this->_validar->getWarnings();
+		echo json_encode($this->_return);
+	}
 	public function getForTable()
 	{
 		Session::regenerateId();
@@ -146,8 +197,7 @@ class inventarioController extends Controller
 		Session::regenerateId();
     	Session::securitySession();
 		$activos = inventario::select(array('inventario.id'=>'value','inventario.noSerie'=>'text'))
-			->join(array('facturas','f'),'inventario.idfactura','=','f.id','LEFT')
-			->join(array('areas','a'),'f.area','=','a.id','LEFT')
+			->join(array('areas','a'),'inventario.area','=','a.id','LEFT')
 			->where('inventario.status','2')
 			->where('a.clave',$_SESSION["userData"]["area"])
 			->where('inventario.cantidad',1)
@@ -175,6 +225,7 @@ class inventarioController extends Controller
 		$this->_data["modelo"] = isset($data["modelo"]) ? $data["modelo"] : "";
 		$this->_data["noSerie"] = isset($data["noSerie"]) ? $data["noSerie"] : "";
 		$this->_data["um"] = isset($data["um"]) ? $data["um"] : "";
+		$this->_data["area"] = isset($data["area"]) ? (integer)$data["area"] : 0;
 		$this->_data["descripcion"] = isset($data["descripcion"]) ? $data["descripcion"] : "";
 		$this->_data["status"] = isset($data["status"]) ? ((integer)$data["status"] > 0 ? (integer)$data["status"] : 2) : 2;
 	}

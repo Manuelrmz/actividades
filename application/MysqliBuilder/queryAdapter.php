@@ -202,7 +202,7 @@ class queryAdapter
 				}
 				//IS NULL
 				else if(is_array($statement['key']))
-					$sql .= $statement["jointer"] . ' ' . $statement["key"][0] . ' ' .$statement["key"][1];
+					$sql .= $statement["jointer"] . ' ' . $statement["key"][0] . ' ' .$statement["key"][1].' ';
 				//Where, Or where and negative
 				else
 				{

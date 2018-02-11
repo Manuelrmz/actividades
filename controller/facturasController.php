@@ -60,6 +60,7 @@ class facturasController extends Controller
                         }
                         $equipo["idfactura"] = $this->_data["id"];
                         $equipo["status"] = 2;
+                        $equipo["area"] = $this->_data["area"];
                         $q->table("inventario")->insert($equipo);
                     }
                 }
@@ -167,6 +168,7 @@ class facturasController extends Controller
                         else
                         {
                             $equipo["status"] = 2;
+                            $equipo["area"] = $this->_data["area"];
                             $q->table("inventario")->insert($equipo);
                         }
                     }
