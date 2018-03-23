@@ -11,7 +11,7 @@ class catinventarioController extends Controller
     {
         Session::regenerateId();
         Session::securitySession();
-        $categorias = inventarioCategoria::select(array('id','nombre','descripcion','IF(estado = 1,true,false)'=>'estado'))->get()->fetch_all();
+        $categorias = inventarioCategoria::select(array('id','nombre','descripcion','IF(estado = 1,true,false)'=>'estado'))->orderBy('nombre','ASC')->get()->fetch_all();
         if($categorias)
         {
             $this->_return["msg"] = $categorias;

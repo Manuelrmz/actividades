@@ -398,15 +398,8 @@ function complete()
         updateError(e.xhr.responseText);
       },
       batch:true,
-      pageSize: 20
     }),
     toolbar: ["create"],
-    pageable:
-    {
-      refresh: true,
-      pageSizes: true,
-      buttonCount: 5
-    },
     height:400,
     columns: [
       { field: "nombre",title:'Nombre'},
@@ -499,16 +492,9 @@ function complete()
       {
         updateError(e.xhr.responseText);
       },
-      batch:true,
-      pageSize: 20
+      batch:true
     }),
     toolbar: ["create"],
-    pageable:
-    {
-      refresh: true,
-      pageSizes: true,
-      buttonCount: 5
-    },
     height:400,
     columns: [
       { field: "nombre",title:'Nombre'},

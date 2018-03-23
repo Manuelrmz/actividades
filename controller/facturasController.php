@@ -257,7 +257,7 @@ class facturasController extends Controller
             $factura = facturas::where('id',$id)->get()->fetch_assoc();
             if($factura)
             {
-                $factura["equip"] = inventario::select(array('id'=>'idInventario','cantidad','codigo','categoria','tipoEquipo','marca','modelo','noSerie','um','descripcion'))->where('idfactura',$id)->get()->fetch_all();
+                $factura["equip"] = inventario::select(array('id'=>'idInventario','cantidad','codigo','categoria','tipoEquipo','marca','modelo','noSerie','um','descripcion','costo'))->where('idfactura',$id)->get()->fetch_all();
                 $factura["files"] = archivos::select(array('CONCAT("private/facturas/",archivos.filename)'=>'file','af.campo'))->join(array('archivosFactura','af'),'archivos.id','=','af.idarchivo','LEFT')->where('af.idfactura',$id)->get()->fetch_all();
                 $this->_return["msg"] = $factura;
                 $this->_return["ok"] = true;

@@ -41,17 +41,21 @@
 			<div class="col-sm-12 bold margin-form">Unidad de Medida</div>
 			<div class="col-sm-12 margin-form"><select name="um" id="um" style="width:100%;"></select></div>
 		</div>
-		<div class="col-sm-4" style="height:49px;">
+		<div class="col-sm-3" style="height:49px;">
 			<div class="col-sm-12 bold margin-form">Codigo</div>
 			<div class="col-sm-12 margin-form"><input type="text" id="codigo" name="codigo" class="k-textbox" placeholder="Codigo"></div>
 		</div>
-		<div class="col-sm-4">
+		<div class="col-sm-3">
 			<div class="col-sm-12 bold margin-form">Modelo</div>
 			<div class="col-sm-12 margin-form"><input type="text" id="modelo" name="modelo" class="k-textbox" placeholder="Modelo"></div>
 		</div>
-		<div class="col-sm-4">
+		<div class="col-sm-3">
 			<div class="col-sm-12 bold margin-form">No. Serie</div>
 			<div class="col-sm-12 margin-form"><input type="text" id="noSerie" name="noSerie" class="k-textbox" placeholder="Numero de Serie"></div>
+		</div>
+		<div class="col-sm-3">
+			<div class="col-sm-12 bold margin-form">Costo</div>
+			<div class="col-sm-12 margin-form"><input type="number" id="costo" name="costo" class="k-textbox" placeholder="Costo"></div>
 		</div>
 		<div class="col-sm-12">
 			<div class="col-sm-12 bold margin-form">Descripcion</div>

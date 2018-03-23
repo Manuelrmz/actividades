@@ -181,7 +181,7 @@ class inventarioController extends Controller
 		Session::regenerateId();
     	Session::securitySession();
 		$this->validatePermissions('inventario');
-		$activos = inventario::select(array('id'=>'idInventario','cantidad','codigo','categoria','tipoEquipo','marca','modelo','noSerie','um','descripcion'))
+		$activos = inventario::select(array('id'=>'idInventario','cantidad','codigo','categoria','tipoEquipo','marca','modelo','noSerie','um','descripcion','costo'))
 			->get()->fetch_all();
 		if($activos)
 		{
@@ -226,6 +226,7 @@ class inventarioController extends Controller
 		$this->_data["noSerie"] = isset($data["noSerie"]) ? $data["noSerie"] : "";
 		$this->_data["um"] = isset($data["um"]) ? $data["um"] : "";
 		$this->_data["area"] = isset($data["area"]) ? (integer)$data["area"] : 0;
+		$this->_data["costo"] = isset($data["costo"]) ? (integer)$data["costo"] : 0;
 		$this->_data["descripcion"] = isset($data["descripcion"]) ? $data["descripcion"] : "";
 		$this->_data["status"] = isset($data["status"]) ? ((integer)$data["status"] > 0 ? (integer)$data["status"] : 2) : 2;
 	}

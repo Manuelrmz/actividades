@@ -149,6 +149,7 @@ function cleanFieldsInventario()
 	$("#codigo").val("");
 	$("#modelo").val("");
 	$("#noSerie").val("");
+	$("#costo").val("");
 	$("#descripcion").val("");
 	$("#btnFacturaDetail").hide();
 	$("#btnResguardoDetail").hide();
@@ -305,6 +306,7 @@ function eventTable()
 					$("#codigo").val(json.msg.codigo);
 					$("#modelo").val(json.msg.modelo);
 					$("#noSerie").val(json.msg.noSerie);
+					$("#costo").val(json.msg.costo);
 					$("#descripcion").val(json.msg.descripcion);
 					if(json.msg.idfactura)
 						$("#btnFacturaDetail").show();

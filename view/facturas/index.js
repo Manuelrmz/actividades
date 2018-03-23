@@ -111,6 +111,7 @@ function complete()
                         modelo: { validation: { required: false } },
                         noSerie: { validation: { required: false } },
                         um: {validation: { required: true } },
+                        costo: { type:"number", validation: { required: false } },
                         descripcion: { validation: { required: false } }
                     }
                 }
@@ -124,15 +125,17 @@ function complete()
             buttonCount: 5
         },
         height:374,
+        navigatable:true,
         columns: [
-            { field: "cantidad",title:'Cant.',width:80},
-            { field: "codigo",title:'Codigo',width:100},
+            { field: "cantidad",title:'Cant.',width:70},
+            { field: "codigo",title:'Codigo',width:80},
             { field: "categoria",title:'Categoria',editor:categoriaAutoCompleteEditor,width:120},
             { field: "tipoEquipo",title:'Tipo de Equipo', editor:tipoEquipoAutoCompleteEditor,width:120},
             { field: "marca",title:'Marca', editor:marcaAutoCompleteEditor,width:120},
             { field: "modelo",title:'Modelo',width:120},
-            { field: "noSerie",title:'No. Serie',width:120},
+            { field: "noSerie",title:'No. Serie',width:100},
             { field: "um",title:'U/M', editor:umAutoCompleteEditor,width:100},
+            { field: "costo", title:"Costo"},
             { field: "descripcion",title:'Descripcion'},
             { command: "destroy", title: "&nbsp;", width: 100 },
         ],
@@ -533,9 +536,9 @@ function categoriaAutoCompleteEditor(container,options)
         .kendoAutoComplete({
         dataSource: categoriesInventario,
         dataTextField: "text",
-        filter: "contains",
+        filter: "startswith",
         minLength: 1
-    });
+    }).data("kendoAutoComplete").search('');
 }
 function tipoEquipoAutoCompleteEditor(container,options)
 {
@@ -544,7 +547,7 @@ function tipoEquipoAutoCompleteEditor(container,options)
         .kendoAutoComplete({
         dataSource: tipoEquipoInventario,
         dataTextField: "text",
-        filter: "contains",
+        filter: "startswith",
         minLength: 1
     });
 }
@@ -555,7 +558,7 @@ function marcaAutoCompleteEditor(container,options)
         .kendoAutoComplete({
         dataSource: marcaInventario,
         dataTextField: "text",
-        filter: "contains",
+        filter: "startswith",
         minLength: 1
     });
 }
@@ -566,7 +569,7 @@ function umAutoCompleteEditor(container,options)
         .kendoAutoComplete({
         dataSource: umInventario,
         dataTextField: "text",
-        filter: "contains",
+        filter: "startswith",
         minLength: 1
     });
 }
