@@ -538,7 +538,7 @@ function categoriaAutoCompleteEditor(container,options)
         dataTextField: "text",
         filter: "startswith",
         minLength: 1
-    }).data("kendoAutoComplete").search('');
+    });
 }
 function tipoEquipoAutoCompleteEditor(container,options)
 {

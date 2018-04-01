@@ -1,5 +1,6 @@
 <?php
 	echo $this->addScript('view/principal/css/login.css','css');
+	echo $this->addScript('view/principal/js/login.js','js');
 ?>
 <form action="../usuarios/login" method="POST">
 	<div id="formulario" class="clear">
