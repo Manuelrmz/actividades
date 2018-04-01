@@ -1,5 +1,3 @@
-var menuOpened = true;
-var minSize = false;
 function fechaActual()
 {
 	var date = new Date();

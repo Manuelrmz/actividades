@@ -209,6 +209,8 @@
 		{
 		?>
 		<script type="text/javascript">
+			var menuOpened = true;
+			var minSize = false;
 			function toogleMenuIcon(x) 
 			{
 				x.classList.toggle("change");
